@@ -25,6 +25,7 @@ const char FS_PWD[] PROGMEM =  "";
 #define SEND2FSAPP 0
 #define SEND2MQTT 0
 #define SEND2INFLUX 0
+#define SSL_INFLUX 0
 #define SEND2LORA 0
 #define SEND2CSV 0
 #define SEND2CUSTOM 0
@@ -56,6 +57,8 @@ const char PWD_CUSTOM[] PROGMEM= "";
 const char HOST_INFLUX[] PROGMEM = "influx.server";
 const char URL_INFLUX[] PROGMEM = "/write?db=luftdaten";
 #define PORT_INFLUX 8086
+const char USER_INFLUX[] PROGMEM = "";
+const char PWD_INFLUX[] PROGMEM= "";
 
 #ifdef ESP32
 #define D7 4

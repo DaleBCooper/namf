@@ -83,19 +83,21 @@ float SerialSDS::errorRate() {
     if (packetCount == 0) return 0;
     return (float)checksumFailed/(float)packetCount * 100.0;
 }
-
+void SerialSDS::setMeasureMode(bool mode) {
+    measureMode = mode;
+};
 bool SerialSDS::checksumValid(void) {
     uint8_t checksum_is = 0;
     for (unsigned i = 2; i < 8; ++i) {
         checksum_is += _buff[i];
     }
     bool chk = _buff[9] == 0xAB && checksum_is == _buff[8];
-    packetCount++;
+    if (measureMode) packetCount++;
     //overflow
     if (packetCount == 0)   {
         checksumFailed = 0;
     }
-    if (!chk) {
+    if (!chk && measureMode) {
         debug_out(F("SDS011 reply checksum failed "), DEBUG_ERROR);
         checksumFailed++;
     }

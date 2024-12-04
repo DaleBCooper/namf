@@ -56,7 +56,8 @@ namespace cfg {
 //     String lw_apps_key = F("");
 //     String lw_dev_addr = F("");
 #endif
-
+    unsigned failed_checksums_PMS = 0;
+    unsigned long total_packet_count_PMS = 0;
     bool dht_read = DHT_READ;
     bool sds_read = SDS_READ;
     bool pms_read = PMS_READ;

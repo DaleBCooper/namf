@@ -270,7 +270,10 @@ namespace NAMWiFi {
         }
         return false;
     }
-
+    void stopWifi() {
+        WiFi.mode(WIFI_OFF);
+        cfg::internet = false;
+    }
     void tryToReconnect() {
         if (state == CLIENT && WiFi.status() != WL_CONNECTED) {
             debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);

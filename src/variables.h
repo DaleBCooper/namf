@@ -9,8 +9,8 @@
 #define SOFTWARE_VERSION  "NAMF-2020-boot"
 #define SOFTWARE_VERSION_SHORT "boot"
 #else
-#define SOFTWARE_VERSION  "NAMF-2020-46rc13"
-#define SOFTWARE_VERSION_SHORT "46rc13"
+#define SOFTWARE_VERSION  "NAMF-46rc14"
+#define SOFTWARE_VERSION_SHORT "46rc14"
 // undefine SOFTWARE_BETA in production releases
 #define SOFTWARE_BETA  1
 #endif
@@ -78,7 +78,8 @@ namespace cfg {
 //    extern String lw_apps_key;
 //    extern String lw_dev_addr;
 #endif
-
+    extern unsigned failed_checksums_PMS;
+    extern unsigned long total_packet_count_PMS;
     extern bool dht_read;
     extern bool sds_read;
     extern bool pms_read;

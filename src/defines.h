@@ -18,7 +18,7 @@ const unsigned long DISPLAY_UPDATE_INTERVAL_MS = 5000;
 const unsigned long ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 extern unsigned long PAUSE_BETWEEN_UPDATE_ATTEMPTS_MS;        // interval for check for firmware update
 const unsigned long DURATION_BEFORE_FORCED_RESTART_MS = ONE_DAY_IN_MS * 28;  // force a reboot every ~4 weeks
-#define SDS_SERIAL_BUFF_SIZE    36
+#define SDS_SERIAL_BUFF_SIZE    64
 
 typedef struct memory_stat_t {
     uint32_t freeHeap;
@@ -51,7 +51,7 @@ extern String tmpl(const String& patt, const String& value);
 
 #define HOST_SENSEMAP "ingress.opensensemap.org"
 #define URL_SENSEMAP "/boxes/BOXID/data?luftdaten=1"
-#define PORT_SENSEMAP 443
+#define     PORT_SENSEMAP 443
 
 #define HOST_FSAPP "www.h2801469.stratoserver.net"
 #define URL_FSAPP "/data.php"

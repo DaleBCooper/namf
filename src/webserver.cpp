@@ -980,7 +980,13 @@ void webserver_values() {
         page_content.concat(
                 table_row_from_value(FPSTR(SENSORS_PMSx003), "PM10", check_display_value(last_value_PMS_P1, -1, 1, 0),
                                      unit_PM));
-    }
+        page_content.concat(
+                    table_row_from_value(FPSTR(SENSORS_PMSx003), "Packets", String(cfg::total_packet_count_PMS), "")
+                );
+        page_content.concat(
+                    table_row_from_value(FPSTR(SENSORS_PMSx003), "Chck.err", String(cfg::failed_checksums_PMS), "")
+                );
+    };
     if (cfg::dht_read) {
         page_content.concat(FPSTR(EMPTY_ROW));
         page_content.concat(table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE),

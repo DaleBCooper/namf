@@ -1,5 +1,8 @@
+NAMF-2020-46rc14 ()
+- testing SoftwareSerial downgrade 
+
 NAMF-2020-46rc13 (2024-09-12 rev e79b03f2a5e7cdd64b98cd100914383860f39b44)
-- returning with setting continous mode for SDS
+- returning with setting continuous mode for SDS
 
 NAMF-2020-46rc12 (2024-09-10 rev b028bb217b91f130c220685189ece4c52989a5bb)
 - longer reading time (more packets processed) should help in case higher checksum error ratio will be present in stable release 

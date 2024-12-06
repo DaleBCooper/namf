@@ -28,6 +28,8 @@ namespace NAMWiFi {
 
     void stopWifi();
 
+    void restartWiFi();
+
     void startAP();
 
     void process();

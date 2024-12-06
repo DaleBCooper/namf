@@ -156,13 +156,30 @@ namespace NAMWiFi {
                 debug_out(F("WiFi state is UNSET and client SSID present. Trying to connect...."), DEBUG_MIN_INFO);
                 connectWifi();
                 lastCheck = millis();
-
             }
-
         }
-
     }
 
+    //Just try to get back WIFI_STA, it should use old credentials - to be used with SDS stopping WiFi
+    void restartWiFi() {
+        WiFi.mode(WIFI_STA);
+        cfg::internet = true;
+        if (!WiFi.isConnected()) {
+            debug_out(F("Reconnecting WiFi..."),DEBUG_MED_INFO);
+            WiFi.reconnect();
+            debug_out(F(" done."),DEBUG_MED_INFO);
+
+        }
+        delay(100);
+        byte cnt=0;
+        do {
+            cnt ++;
+            delay(300);
+        } while (cnt < 15 && !WiFi.isConnected() );
+        debug_out(F("WiFi status: "),DEBUG_MED_INFO, false);
+        debug_out(String(WiFi.isConnected()),DEBUG_MED_INFO);
+
+    }
 /*****************************************************************
  * Start WiFi in AP mode (for configuration)
  *****************************************************************/

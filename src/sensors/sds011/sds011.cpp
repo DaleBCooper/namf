@@ -491,7 +491,7 @@ namespace SDS011 {
             case STOP:
                 processReadings();
                 channelSDS.setMeasureMode(false);
-                NAMWiFi::connectWifi();
+                NAMWiFi::restartWiFi();
                 debug_out(F("SDS011: end of cycle"), DEBUG_MIN_INFO, 1);
                 is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
                 updateState(AFTER_READING);

@@ -1,6 +1,9 @@
 # List of changes in alfa versions
 
-### NAMF-4614a
+### NAMF-46rc14b
+- quick WiFi reconnect (based on info https://johnmu.com/2022-esp8266-wifi-speed/)
+
+### NAMF-46rc14a
 - stop WiFi when measuring with SDS. It is meant to have lower checksum error rate on software serial
 
 

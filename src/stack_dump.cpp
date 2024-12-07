@@ -1,6 +1,6 @@
 #include "stack_dump.h"
 
-extern "C" void __custom_crash_callback(struct rst_info *rst_info, uint32_t stack, uint32_t stack_end) {
+extern "C" void custom_crash_callback(struct rst_info *rst_info, uint32_t stack, uint32_t stack_end) {
 #ifdef ARDUINO_ARCH_ESP8266
     cont_t g_cont __attribute__ ((aligned (16)));
     File out;

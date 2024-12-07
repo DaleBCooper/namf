@@ -1,20 +1,20 @@
 #include "stack_dump.h"
 
-extern "C" void custom_crash_callback(struct rst_info *rst_info, uint32_t stack, uint32_t stack_end) {
+extern "C" void __custom_crash_callback(struct rst_info *rst_info, uint32_t stack, uint32_t stack_end) {
 #ifdef ARDUINO_ARCH_ESP8266
     cont_t g_cont __attribute__ ((aligned (16)));
     File out;
     boolean dump = true;
     noInterrupts();
     out = SPIFFS.open("/stack_dump", "w");
-    time_t now = time(nullptr);
-    char tmp[48];
-    strncpy(tmp, ctime(&now), 47);
-    out.print(tmp);
-    out.println(SOFTWARE_VERSION);
-    out.println(INTL_LANG);
-    out.println(ESP.getSketchMD5());
-    out.println();
+//    time_t now = time(nullptr);
+    static char tmp[48];
+//    strncpy(tmp, ctime(&now), 47);
+//    out.print(tmp);
+//    out.println(SOFTWARE_VERSION);
+//    out.println(INTL_LANG);
+//    out.println(ESP.getSketchMD5());
+//    out.println();
     uint32_t cont_stack_start = (uint32_t) &(g_cont.stack);
     uint32_t cont_stack_end = (uint32_t) g_cont.stack_end;
     uint32_t offset = 0;

@@ -1,5 +1,9 @@
 # List of changes in alfa versions
 
+### NAMF-4614a
+- stop WiFi when measuring with SDS. It is meant to have lower checksum error rate on software serial
+
+
 This is list of test/experiment firmwares. If You need to see what have changed in stable/beta see [Versions.md](Versions.md)
 
 ### NAMF-2020-42a2 (2021-12-6 rev dd4c9c21992743ef4da6e011b04af720536c1fba)

@@ -1,6 +1,9 @@
 # List of changes in alfa versions
 
-### NAMF-46rc14c
+### NAMF-46rc14d (rev a47030eb878baec82608993a9aa4d764c9bcd977)
+- full reconnect 
+
+### NAMF-46rc14c (rev a47030eb878baec82608993a9aa4d764c9bcd977)
 - Disabling WiFi persistence
 
 ### NAMF-46rc14b d5efaf5d3f18c470ef3e26df1a9d9d1ba515858b

@@ -184,9 +184,10 @@ namespace NAMWiFi {
 //            WiFi.config(settings.ip_address, settings.ip_gateway, settings.ip_mask);
 //            WiFi.begin(cfg::wlanssid, cfg::wlanpwd, settings.wifi_channel, settings.wifi_bssid, true); //won't work with fallback wifi
 //        } else {
-            debug_out(F("Reconnecting WiFi..."),DEBUG_MED_INFO);
-            WiFi.reconnect();
-            debug_out(F(" done."),DEBUG_MED_INFO);
+        debug_out(F("Reconnecting WiFi..."), DEBUG_MED_INFO);
+        connectWifi();
+
+        debug_out(F(" done."), DEBUG_MED_INFO);
 //        }
         delay(10);
         byte cnt=0;
@@ -325,7 +326,7 @@ namespace NAMWiFi {
         cfg::internet = false;
     }
     void tryToReconnect() {
-        if (state == CLIENT && WiFi.status() != WL_CONNECTED) {
+        if (state == CLIENT && !WiFi.isConnected()) {
             debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
             WiFi.reconnect();
             NAMWiFi::waitForWifiToConnect(20);

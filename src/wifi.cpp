@@ -176,18 +176,18 @@ namespace NAMWiFi {
     void restartWiFi() {
         unsigned long t = millis();
 
-        if (settingsSaved) {
-            debug_out(F("Trying fast WiFi reconnect"), DEBUG_MED_INFO);
-            cfg::internet = true;
-            WiFi.persistent(true);
-            WiFi.mode(WIFI_STA);
-            WiFi.config(settings.ip_address, settings.ip_gateway, settings.ip_mask);
-            WiFi.begin(cfg::wlanssid, cfg::wlanpwd, settings.wifi_channel, settings.wifi_bssid, true); //won't work with fallback wifi
-        } else {
+//        if (settingsSaved) {
+//            debug_out(F("Trying fast WiFi reconnect"), DEBUG_MED_INFO);
+//            cfg::internet = true;
+//            WiFi.persistent(true);
+//            WiFi.mode(WIFI_STA);
+//            WiFi.config(settings.ip_address, settings.ip_gateway, settings.ip_mask);
+//            WiFi.begin(cfg::wlanssid, cfg::wlanpwd, settings.wifi_channel, settings.wifi_bssid, true); //won't work with fallback wifi
+//        } else {
             debug_out(F("Reconnecting WiFi..."),DEBUG_MED_INFO);
             WiFi.reconnect();
             debug_out(F(" done."),DEBUG_MED_INFO);
-        }
+//        }
         delay(10);
         byte cnt=0;
         while (cnt < 35 && !WiFi.isConnected() ) {

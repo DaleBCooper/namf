@@ -1,5 +1,8 @@
 # List of changes in alfa versions
 
+### NAMF-46rc14c
+- Disabling WiFi persistence
+
 ### NAMF-46rc14b d5efaf5d3f18c470ef3e26df1a9d9d1ba515858b
 - quick WiFi reconnect (based on info https://johnmu.com/2022-esp8266-wifi-speed/)
 - return to 5 measurements from SDS not 10

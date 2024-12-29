@@ -1,7 +1,9 @@
 #include "sending.h"
 
 #if defined(ARDUINO_ARCH_ESP8266)
+
 BearSSL::X509List x509_dst_root_ca(dst_root_ca_x1);
+#endif
 
 void configureCACertTrustAnchor(WiFiClientSecure* client) {
     constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
@@ -13,24 +15,14 @@ void configureCACertTrustAnchor(WiFiClientSecure* client) {
         client->setInsecure();
     }
     else {
+#if defined(ARDUINO_ARCH_ESP8266)
         client->setTrustAnchors(&x509_dst_root_ca);
-    }
-}
 #else
-void configureCACertTrustAnchor(WiFiClientSecure* client) {
-    constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
-							  (__DATE__[ 8] - '0') *  100 + \
-							  (__DATE__[ 9] - '0') *   10 + \
-							  (__DATE__[10] - '0');
-    if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
-        debug_out(F("Time incorrect; Disabling CA verification."), DEBUG_MIN_INFO,1);
-        client->setInsecure();
-    }
-    else {
-        client->setCACert(dst_root_ca_x3);
+        client->setCACert(dst_root_ca_x1);
+#endif
+
     }
 }
-#endif
 
 /*****************************************************************
  * send data to rest api                                         *
@@ -43,7 +35,7 @@ int sendData(const LoggerEntry logger, const String &data, const int pin, const 
         client = new WiFiClientSecure;
         ssl = true;
         configureCACertTrustAnchor(static_cast<WiFiClientSecure *>(client));
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined(ARDUINO_ARCH_ESP8266)
         static_cast<WiFiClientSecure *>(client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
 #endif
     } else {

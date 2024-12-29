@@ -145,8 +145,10 @@ void readConfig() {
                 setDefaultConfig();
             };
 		} else {
+#if defined(ARDUINO_ARCH_ESP8266)
 			debug_out(F("config file not found, resetting WiFi settings ..."), DEBUG_ERROR, 1);
             ESP.eraseConfig();
+#endif
 		}
 }
 

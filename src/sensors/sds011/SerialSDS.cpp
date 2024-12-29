@@ -48,6 +48,8 @@ void SerialSDS::process() {
                 if (idx == 10) {
                     if (!checksumValid()) {
                         _currState = SER_UNDEF;
+                        if (cfg::debug > DEBUG_MIN_INFO) logReply(SDS_DATA);
+                        clearBuf();
                         break;
                     }
                     _replies[SDS_DATA].received = true;
@@ -81,24 +83,26 @@ float SerialSDS::errorRate() {
     if (packetCount == 0) return 0;
     return (float)checksumFailed/(float)packetCount * 100.0;
 }
-
+void SerialSDS::setMeasureMode(bool mode) {
+    measureMode = mode;
+};
 bool SerialSDS::checksumValid(void) {
     uint8_t checksum_is = 0;
     for (unsigned i = 2; i < 8; ++i) {
         checksum_is += _buff[i];
     }
     bool chk = _buff[9] == 0xAB && checksum_is == _buff[8];
-    packetCount++;
+    if (measureMode) packetCount++;
     //overflow
     if (packetCount == 0)   {
         checksumFailed = 0;
     }
-    if (!chk) {
+    if (!chk && measureMode) {
         debug_out(F("SDS011 reply checksum failed "), DEBUG_ERROR);
         checksumFailed++;
     }
     debug_out(String(checksum_is,16),DEBUG_MAX_INFO);
-    for (byte i=0; i<10; i++) {
+    for(byte i=0; i<10; i++) {
         debug_out(String(_buff[i],16),DEBUG_MAX_INFO,false);
         debug_out(F(" "),DEBUG_MAX_INFO,false);
 
@@ -123,22 +127,22 @@ void SerialSDS::logReply(ResponseType type) {
             Serial.print(x.data[1] ? F("query ") : F("active"));
             break;
         case SDS_DATA:
-//            Serial.print(F("data packet"));
+            debug_out(F("data packet"), DEBUG_MAX_INFO);
             break;
         case SDS_NEW_DEV_ID:
         case SDS_SLEEP:
-            Serial.print(F("SLEEP MODE "));
-            Serial.print(x.data[0] ? F("SET: ") : F("QUERY: "));
-            Serial.print(x.data[1] ? F("work ") : F("sleep"));
+            debug_out(F("SLEEP MODE "), DEBUG_MAX_INFO, false);
+            debug_out(x.data[0] ? F("SET: ") : F("QUERY: "), DEBUG_MAX_INFO, false);
+            debug_out(x.data[1] ? F("work ") : F("sleep"), DEBUG_MAX_INFO);
             break;
         case SDS_PERIOD:
-            Serial.print(F("WORKING PERIOD "));
-            Serial.print(x.data[0] ? F("SET: ") : F("QUERY: "));
-            Serial.print(x.data[1] ? String(x.data[1]) : F("continous"));
+            debug_out((F("WORKING PERIOD ")), DEBUG_MAX_INFO, false);
+            debug_out(x.data[0] ? F("SET: ") : F("QUERY: "), DEBUG_MAX_INFO, false);
+            debug_out(x.data[1] ? String(x.data[1]) : F("continuous"), DEBUG_MAX_INFO);
             break;
 
         case SDS_FW_VER:
-            Serial.println(F("FIRMWARE VERSION response"));
+            debug_out((F("FIRMWARE VERSION response")), DEBUG_MAX_INFO);
             break;
 
     }

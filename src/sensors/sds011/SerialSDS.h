@@ -38,6 +38,7 @@ public:
         _currState = SER_UNDEF;
         checksumFailed = 0;
         packetCount = 0;
+        measureMode = false;
         for (byte i = 0; i < SDS_UNKNOWN; i++) {
             _replies[i].sent = false;
             _replies[i].received = false;
@@ -62,12 +63,15 @@ public:
     //checksum errors rate
     float errorRate();
 
+    //are we measuring or dumping readings in warmup time?
+    void setMeasureMode(bool);
 private:
     Stream &_serial;
     SerialState _currState;
     byte _buff[10];
     unsigned long checksumFailed;
     unsigned long packetCount;
+    boolean measureMode;
 
     bool checksumValid();
 
@@ -76,6 +80,7 @@ private:
     void clearBuf(void){for (byte i=0; i<10; i++) {_buff[i]=0;}};
 
     void storeReply();
+
 
     ResponseType selectResponse(byte x);
 //    const char SRT_0 [];

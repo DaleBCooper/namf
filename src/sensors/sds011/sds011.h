@@ -14,6 +14,7 @@
 #include "webserver.h"  //HTML functions
 //#include "PCF8574.h"
 #include "SerialSDS.h"
+#include "wifi.h"
 
 namespace SDS011 {
 

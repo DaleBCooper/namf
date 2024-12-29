@@ -226,6 +226,7 @@ static String sensorDS18B20() {
 /*****************************************************************
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
+
 String sensorPMS() {
 	String s = "";
 	char buffer;
@@ -660,8 +661,8 @@ void setup() {
 
     checkFactoryReset();
 #ifdef ARDUINO_ARCH_ESP8266
-    serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false, SDS_SERIAL_BUFF_SIZE);
-    serialGPS.begin(9600, SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false, 64);
+    serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false);
+    serialGPS.begin(9600, SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false);
 #else
     serialSDS.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false, SDS_SERIAL_BUFF_SIZE);
     serialGPS.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false, 64);

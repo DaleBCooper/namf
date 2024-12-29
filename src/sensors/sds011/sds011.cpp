@@ -470,13 +470,15 @@ namespace SDS011 {
             case WARMUP:
                 if (t < readTime + SDS011_END_TIME)
                     updateState(READ);
-                return 10;
+                return 20;
             case READ:
 //                serialSDS.flush();
                 resetReadings();
+                NAMWiFi::stopWifi();
+                channelSDS.setMeasureMode(true);
                 SDS_waiting_for = SDS_REPLY_HDR;
                 updateState(READING);
-                return 10;
+                return 20;
             case READING:
                 if (channelSDS.fetchReading(pm10, pm25)) {
                     storeReadings(pm10, pm25);
@@ -488,6 +490,8 @@ namespace SDS011 {
                 return 20;
             case STOP:
                 processReadings();
+                channelSDS.setMeasureMode(false);
+                NAMWiFi::restartWiFi();
                 debug_out(F("SDS011: end of cycle"), DEBUG_MIN_INFO, 1);
                 is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
                 updateState(AFTER_READING);

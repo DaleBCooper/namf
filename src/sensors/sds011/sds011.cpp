@@ -474,7 +474,9 @@ namespace SDS011 {
             case READ:
 //                serialSDS.flush();
                 resetReadings();
+#ifdef ARDUINO_ARCH_ESP8266
                 NAMWiFi::stopWifi();
+#endif
                 channelSDS.setMeasureMode(true);
                 SDS_waiting_for = SDS_REPLY_HDR;
                 updateState(READING);
@@ -491,7 +493,9 @@ namespace SDS011 {
             case STOP:
                 processReadings();
                 channelSDS.setMeasureMode(false);
+#ifdef ARDUINO_ARCH_ESP8266
                 NAMWiFi::restartWiFi();
+#endif
                 debug_out(F("SDS011: end of cycle"), DEBUG_MIN_INFO, 1);
                 is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
                 updateState(AFTER_READING);

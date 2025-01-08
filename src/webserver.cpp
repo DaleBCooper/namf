@@ -252,58 +252,6 @@ void webserver_config_json() {
     server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON), page_content);
 }
 
-
-//Webserver - force update with custom URL
-void webserver_config_force_update() {
-
-    if (!webserver_request_auth()) { return; }
-    String page_content = make_header(FPSTR(INTL_CONFIGURATION));
-    if (server.method() == HTTP_POST) {
-        if (server.hasArg("ver") && server.hasArg("lg") ) {
-            page_content.concat(make_footer());
-            server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-            delay(200);
-            cfg::auto_update = false;
-            writeConfig();
-            cfg::auto_update = true;
-            String p = F("/NAMF/data/2020-");
-            p.concat(server.arg("ver"));
-            p.concat(F("/latest_"));
-            p.concat(server.arg("lg"));
-            p.concat(F(".bin"));
-            debug_out(F("Downgrade attempt to: "),DEBUG_ERROR, false);
-            debug_out(p, DEBUG_ERROR);
-//            updateFW(F("fw.nettigo.pl"), 80, p);
-            delay(5000);
-            ESP.restart();
-        }
-        else {
-            server.sendHeader(F("Location"), F("/"));
-        }
-
-    }else {
-
-        page_content.concat(F("<h2>Force update</h2>"));
-        page_content.concat(
-                F("<p>It will disable autoupdate, and try to reinstall older NAMF version. To return to newest version "
-                  "just re-eneable autoupdate in config.</p>"
-                  "<form method='POST' action='/rollback' style='width:100%;'>")
-                  );
-        page_content.concat(F("Select version: <select name='ver'><option value='45'>2020-45</option>"));
-        page_content.concat(F("Select version: <select name='ver'><option value='44'>2020-44</option>"));
-        page_content.concat(F("Select version: <select name='ver'><option value='43'>2020-43</option><option value='42'>2020-42</option></select><br/>"));
-        page_content.concat(F("Select language: <select name='lg'><option value='en'>English</option><option value='pl'>Polish</option></select><br/>"));
-        page_content.concat(F("<br/>"));
-        page_content.concat(form_submit(FPSTR(INTL_SAVE_AND_RESTART)));
-        page_content.concat(F("</form>"));
-        page_content.concat(make_footer());
-
-
-    }
-    server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-}
-
-
 //Webserver - current config as JSON (txt) to save
 void webserver_config_json_save() {
 
@@ -1368,7 +1316,6 @@ void setup_webserver() {
     server.on(F("/simple_config"), webserver_simple_config);
     server.on(F("/config.json"), HTTP_GET, webserver_config_json);
     server.on(F("/configSave.json"), webserver_config_json_save);
-    server.on(F("/rollback"), webserver_config_force_update);
     server.on(F("/wifi"), webserver_wifi);
     server.on(F("/values"), webserver_values);
     server.on(F("/debug"), webserver_debug_level);

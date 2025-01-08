@@ -103,31 +103,6 @@ String sds_report() {
 
 
 
-void updateFW(const String host, const unsigned int port, const String path) {
-    debug_out(F("Check for update with "),DEBUG_MIN_INFO,1);
-    display_debug(F("Update - check"), F(""));
-    debug_out(host,DEBUG_MIN_INFO,1);
-    debug_out(String(port),DEBUG_MIN_INFO,1);
-    debug_out(path,DEBUG_MIN_INFO,1);
-    Serial.println(SOFTWARE_VERSION);
-    String sensorPM = F("");
-    if (SDS011::enabled) { sensorPM = F("SDS");}
-    else if (cfg::pms_read) {sensorPM = F("PMSx");}
-    else if (SPS30::started) {sensorPM = F("SPS");}
-    String ver = String(SOFTWARE_VERSION);
-    ver.concat(String(F(" ")));
-    ver.concat(esp_chipid());
-    ver.concat(String(F(" ")));
-    ver.concat(sensorPM);
-    ver.concat(String(F(" ")));
-    ver.concat(String(cfg::current_lang));
-    ver.concat(String(F(" ")));
-    ver.concat(String(FPSTR(INTL_LANG)));
-    ver.concat(sds_report());
-    t_httpUpdate_return ret = tryUpdate(ver);
-    verifyUpdate(ret);
-};
-
 void updateFW() {
     Serial.print(F("Check for update with default URL"));
     Serial.println(SOFTWARE_VERSION);

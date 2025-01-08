@@ -273,7 +273,7 @@ void webserver_config_force_update() {
             p.concat(F(".bin"));
             debug_out(F("Downgrade attempt to: "),DEBUG_ERROR, false);
             debug_out(p, DEBUG_ERROR);
-            updateFW(F("fw.nettigo.pl"), F("80"), p);
+//            updateFW(F("fw.nettigo.pl"), 80, p);
             delay(5000);
             ESP.restart();
         }

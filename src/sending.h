@@ -9,7 +9,6 @@
 #if defined(ESP8266)
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
-extern void configureCACertTrustAnchor(WiFiClientSecure* client);
 #else
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -25,6 +24,7 @@ extern void configureCACertTrustAnchor(WiFiClientSecure* client);
 #include "sensors/sds011/sds011.h"  //debugging SDS and sending data to InfluxDB
 
 #include "ca-root.h"
+extern void configureCACertTrustAnchor( WiFiClientSecure* client);
 
 /*****************************************************************
  * send data to rest api                                         *

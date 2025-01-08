@@ -8,6 +8,7 @@
 #include "defines.h"
 #include "variables.h"
 #include "helpers.h"
+#include "sending.h"
 #include "sensors/sds011/sds011.h"
 
 #ifdef ARDUINO_ARCH_ESP32
@@ -15,12 +16,19 @@
 #include <HTTPClient.h> /// FOR ESP32 HTTP FOTA UPDATE ///
 #include <HTTPUpdate.h> /// FOR ESP32 HTTP FOTA UPDATE ///
 #include <WiFiClient.h> /// FOR ESP32 HTTP FOTA UPDATE ///
-WiFiClient client;  /// FOR ESP32 HTTP FOTA UPDATE ///
-
-t_httpUpdate_return tryUpdate(const String host, const String port, const String path, const String ver) {
-    unsigned int pt = port.toInt();
-    t_httpUpdate_return ret = httpUpdate.update(client, host, pt, path, ver);
-//    t_httpUpdate_return ret = httpUpdate.update(client, "192.168.1.228", 9080, path, ver);
+WiFiClient *client;
+t_httpUpdate_return tryUpdate(const String& host, const String& path, const String& ver, const bool SSL_only) {
+    unsigned int port = SECURE_UPDATE_PORT;
+    client = new WiFiClientSecure;
+    configureCACertTrustAnchor(static_cast<WiFiClientSecure *>(client));
+    t_httpUpdate_return ret = httpUpdate.update(*client, host, port, path, ver);
+//    t_httpUpdate_return ret = httpUpdate.update(*client, "192.168.1.228", 9080, path, ver);
+    if (ret == HTTP_UPDATE_FAILED && httpUpdate.getLastError() == -1 && !SSL_only) { //connection refused, maybe problem with SSL, try port 80
+        delete client;
+        client = new WiFiClient;
+        port = UPDATE_PORT;
+        ret = httpUpdate.update(*client, host, port, path, ver);
+    }
 //no OTA for now
     return ret;
 }
@@ -37,7 +45,7 @@ t_httpUpdate_return tryUpdate(const String host, const String port, const String
 };
 #endif
 
-t_httpUpdate_return tryUpdate(String const ver) {
+t_httpUpdate_return tryUpdate(String const& ver, boolean SSL_only = false) {
     String host;
     String url;
     switch(cfg::update_channel) {
@@ -57,7 +65,7 @@ t_httpUpdate_return tryUpdate(String const ver) {
     debug_out(F("Update checked:"), DEBUG_MIN_INFO,true);
     debug_out(host, DEBUG_MIN_INFO,true);
     debug_out(url, DEBUG_MIN_INFO,true);
-    return tryUpdate(host,String(UPDATE_PORT), url, ver);
+    return tryUpdate(host, url, ver, SSL_only);
 };
 
 void verifyUpdate (t_httpUpdate_return result) {
@@ -95,11 +103,11 @@ String sds_report() {
 
 
 
-void updateFW(const String host, const String port, const String path) {
+void updateFW(const String host, const unsigned int port, const String path) {
     debug_out(F("Check for update with "),DEBUG_MIN_INFO,1);
     display_debug(F("Update - check"), F(""));
     debug_out(host,DEBUG_MIN_INFO,1);
-    debug_out(port,DEBUG_MIN_INFO,1);
+    debug_out(String(port),DEBUG_MIN_INFO,1);
     debug_out(path,DEBUG_MIN_INFO,1);
     Serial.println(SOFTWARE_VERSION);
     String sensorPM = F("");

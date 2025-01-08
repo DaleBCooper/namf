@@ -147,6 +147,7 @@ void updateFW() {
     ver.concat(String(cfg::current_lang));
     ver.concat(String(F(" ")));
     ver.concat(String(FPSTR(INTL_LANG)));
+    ver.concat(String(F(" ")));
     ver.concat(sds_report());
 
     t_httpUpdate_return ret = tryUpdate(ver);

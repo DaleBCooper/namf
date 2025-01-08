@@ -62,7 +62,7 @@ extern String tmpl(const String& patt, const String& value);
 #define UPDATE_HOST_BETA F("fw.nettigo.pl")
 #define UPDATE_URL F("/NAMF/index.php")
 #define UPDATE_URL_ALFA F("/alfa/NAMF/index.php")
-#define UPDATE_URL_BETA F("/beta//NAMF/index.php")
+#define UPDATE_URL_BETA F("/beta/NAMF/index.php")
 #define UPDATE_PORT 80
 #define SECURE_UPDATE_PORT 443
 

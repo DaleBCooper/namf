@@ -1,5 +1,8 @@
 NAMF-47rc1 ()
 - disable WiFi when reading data from SDS011. It seems to resolve problems with checksum errors of SDS011 
+- ESP32 version changed to work with Heltec Wireless Stick Lite V3 (ESP32-S3)
+- Update server works with ESP8266 & ESP32
+- Updates are downloaded via SSL with fallback over unsecure connection (fully working for ESP32, not finished for ESP8266)
 
 NAMF-2020-46rc13 (2024-09-12 rev e79b03f2a5e7cdd64b98cd100914383860f39b44)
 - returning with setting continuous mode for SDS

@@ -24,12 +24,13 @@ t_httpUpdate_return tryUpdate(const String& host, const String& path, const Stri
     t_httpUpdate_return ret = httpUpdate.update(*client, host, port, path, ver);
 //    t_httpUpdate_return ret = httpUpdate.update(*client, "192.168.1.228", 9080, path, ver);
     if (ret == HTTP_UPDATE_FAILED && httpUpdate.getLastError() == -1 && !SSL_only) { //connection refused, maybe problem with SSL, try port 80
+        debug_out(F("Failed update via SSL. Trying unsecure connection"),DEBUG_ERROR);
         delete client;
         client = new WiFiClient;
         port = UPDATE_PORT;
         ret = httpUpdate.update(*client, host, port, path, ver);
     }
-//no OTA for now
+    delete client;
     return ret;
 }
 #else
@@ -37,12 +38,29 @@ t_httpUpdate_return tryUpdate(const String& host, const String& path, const Stri
 #include <ESP8266WiFi.h>
 #include <ESP8266httpUpdate.h>
 #include "helpers.h"
-t_httpUpdate_return tryUpdate(const String host, const String port, const String path, const String ver) {
-    WiFiClient client;
-    Serial.println(ver);
-    t_httpUpdate_return ret = ESPhttpUpdate.update(client, host, port.toInt(), path, ver);
+t_httpUpdate_return tryUpdate(const String& host, const String& path, const String& ver, const bool SSL_only) {
+    WiFiClient *client;
+
+    unsigned int port = SECURE_UPDATE_PORT;
+    client = new WiFiClientSecure;
+    BearSSL::Session clientSession;
+    static_cast<WiFiClientSecure *>(client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
+    static_cast<WiFiClientSecure*>(client)->setCiphersLessSecure();
+    static_cast<WiFiClientSecure*>(client)->setSession(&clientSession);
+    configureCACertTrustAnchor(static_cast<WiFiClientSecure *>(client));
+
+    t_httpUpdate_return ret = ESPhttpUpdate.update(*client, host, port, path, ver);
+
+    if (ret == HTTP_UPDATE_FAILED && ESPhttpUpdate.getLastError() == -1 && !SSL_only) { //connection refused, maybe problem with SSL, try port 80
+        debug_out(F("Failed update via SSL. Trying unsecure connection"),DEBUG_ERROR);
+        delete client;
+        client = new WiFiClient;
+        port = UPDATE_PORT;
+        ret = ESPhttpUpdate.update(*client, host, port, path, ver);
+    }
+    delete client;
     return ret;
-};
+}
 #endif
 
 t_httpUpdate_return tryUpdate(String const& ver, boolean SSL_only = false) {

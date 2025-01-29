@@ -4,6 +4,8 @@
 
 #include "webserver.h"
 #include "wifi.h"
+#include "lora/lorawan.h"
+
 unsigned maxSizeTemp = 0;
 void webserverPartialSend(String &s) {
     if (s.length() == 0) return;    //do not end by accident, when no data to send
@@ -1156,6 +1158,12 @@ void webserver_status_page(void) {
     page_content.concat(table_row_from_value(F("NAM"), F("Uptime"), millisToTime(millis()), ""));
     page_content.concat(table_row_from_value(F("NAM"), FPSTR(INTL_TIME_FROM_UPDATE), millisToTime(msSince(last_update_attempt)), ""));
     page_content.concat(table_row_from_value(F("NAM"), F("Internet connection"),String(cfg::internet), ""));
+#ifdef NAM_LORAWAN
+    page_content.concat(FPSTR(EMPTY_ROW));
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Join status"),LoRaWan::state == LoRaWan::STATE_JOINED ? F("Joined"): F("Not joined"), ""));
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Last air time"),String(LoRaWan::lastAirTime), "ms"));
+#endif
+
     page_content.concat(FPSTR(EMPTY_ROW));
     page_content.concat(table_row_from_value(F("APIs"), F("Status"),F("Time"), ""));
     for (byte i=0; i<cfg::apiCount;i++){

@@ -6,6 +6,8 @@
 #include "lorawan.h"
 #include <ArduinoJson.h>
 #include "helpers.h"
+#include "radio/sx126x/radio.cpp"
+
 namespace LoRaWan {
     hw_config hwConfig;
     ModuleState state = STATE_OK;
@@ -15,6 +17,7 @@ namespace LoRaWan {
     uint8_t nodeAppKey[16];
 
     unsigned long lastSend = 0;
+    unsigned long lastAirTime = 0;
     lmh_error_status lastSendStatus = LMH_SUCCESS;
     // ESP32 - SX126x pin configuration
     int PIN_LORA_RESET = 12;     // LORA RESET
@@ -276,6 +279,9 @@ namespace LoRaWan {
 
         lastSendStatus = lmh_send(&m_lora_app_data, LMH_UNCONFIRMED_MSG);
         Serial.printf("lmh_send result %d\n", lastSendStatus);
+        if (lastSendStatus == LMH_SUCCESS) {
+            lastAirTime = RadioTimeOnAir(MODEM_LORA, lpp.getSize());
+        } else { lastAirTime = 0; }
     }
 
 /**@brief Function for handling a LoRa tx timer timeout event.

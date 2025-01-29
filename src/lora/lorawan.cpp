@@ -158,9 +158,8 @@ namespace LoRaWan {
 #endif
         debug_out("LORA WAN JOINED!", DEBUG_ERROR);
         lmh_class_request(CLASS_A);
+        state = STATE_JOINED;
 
-        TimerSetValue(&appTimer, LORAWAN_APP_TX_DUTYCYCLE);
-        TimerStart(&appTimer);
     }
 
 /**@brief Function for handling LoRaWan received data from Gateway
@@ -227,7 +226,10 @@ namespace LoRaWan {
         float h = -0;
         DynamicJsonBuffer jsonBuffer;
 
-        if (state != STATE_JOINED) return;
+        if (state != STATE_JOINED) {
+            debug_out(F("Not joined to LoRaWAN!"), DEBUG_ERROR);
+            return;
+        };
 
         JsonObject &json = jsonBuffer.parseObject(data);
         if (!json.success()) {

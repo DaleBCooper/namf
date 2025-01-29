@@ -9,7 +9,7 @@
 #include <LoRaWan-Arduino.h>
 #include <SPI.h>
 #include <CayenneLPP.h>
-
+#include "helpers.h"
 namespace LoRaWan {
     typedef enum {
         STATE_OK,

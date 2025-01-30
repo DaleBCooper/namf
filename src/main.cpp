@@ -790,7 +790,7 @@ static unsigned long sendDataToOptionalApis(const String &data) {
     int result = 0;
 #if defined(NAM_LORAWAN)
     if (cfg::lw_en) {
-        debug_out("\n\nLORAWAN leci!",DEBUG_ERROR);
+        debug_out("\n\nLORAWAN send.",DEBUG_MIN_INFO);
         LoRaWan::send_lora_frame(data);
     }
 #endif

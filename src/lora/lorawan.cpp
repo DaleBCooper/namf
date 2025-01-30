@@ -272,7 +272,7 @@ namespace LoRaWan {
             for (auto obj : items) {
                 String k = obj.as<JsonObject>()["value_type"];
 
-                debug_out(obj.as<JsonObject>()["value"], DEBUG_ERROR);
+//                debug_out(obj.as<JsonObject>()["value"], DEBUG_ERROR);
                 if (k.equals(String(F("SDS_P1")))) {
                     pm10 = obj.as<JsonObject>().get<float>("value");
                 }

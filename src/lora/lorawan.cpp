@@ -15,9 +15,16 @@ namespace LoRaWan {
     uint8_t nodeDeviceEUI[8];
     uint8_t nodeAppEUI[8];
     uint8_t nodeAppKey[16];
+    uint32_t lastAirTime = 0;
 
     unsigned long lastSend = 0;
-    unsigned long lastAirTime = 0;
+    constexpr byte airTimeTableSize = 10;
+    uint32_t airTimeData[airTimeTableSize] = { };
+    byte airTimeIndex = 0;
+    byte airTimeSamples = 0;
+
+    CayenneLPP lpp(20);
+
     lmh_error_status lastSendStatus = LMH_SUCCESS;
     // ESP32 - SX126x pin configuration
     int PIN_LORA_RESET = 12;     // LORA RESET
@@ -41,6 +48,9 @@ namespace LoRaWan {
 */
     lmh_param_t lora_param_init = {LORAWAN_ADR_ON, LORAWAN_DEFAULT_DATARATE, LORAWAN_PUBLIC_NETWORK,
                                    JOINREQ_NBTRIALS, LORAWAN_DEFAULT_TX_POWER, LORAWAN_DUTYCYCLE_OFF};
+
+
+
 
 /**@brief Structure containing LoRaWan callback functions, needed for lmh_init()
 */
@@ -219,7 +229,24 @@ namespace LoRaWan {
         lmh_send(&m_lora_app_data, LMH_UNCONFIRMED_MSG);
     }
 
-    CayenneLPP lpp(20);
+    //store airTime for average calculation
+    void storeAirTime(uint32_t t) {
+        lastAirTime = t;
+        airTimeData[airTimeIndex++] = t;
+        if (airTimeIndex >= airTimeSamples) airTimeIndex = 0;
+        if (airTimeSamples < airTimeTableSize) airTimeSamples++;
+    }
+
+    u32_t averageAirTime () {
+        if (airTimeSamples == 0 ) { return 0; }
+        u64_t sum = 0;
+        //we can sum all elements since not used are initialized as 0
+        for (u32_t t : airTimeData)
+            sum += t;
+        return sum/airTimeSamples;
+    }
+
+
 
     void send_lora_frame(String data)
     {
@@ -280,7 +307,7 @@ namespace LoRaWan {
         lastSendStatus = lmh_send(&m_lora_app_data, LMH_UNCONFIRMED_MSG);
         Serial.printf("lmh_send result %d\n", lastSendStatus);
         if (lastSendStatus == LMH_SUCCESS) {
-            lastAirTime = RadioTimeOnAir(MODEM_LORA, lpp.getSize());
+            storeAirTime(RadioTimeOnAir(MODEM_LORA, lpp.getSize()));
         } else { lastAirTime = 0; }
     }
 
@@ -294,7 +321,7 @@ namespace LoRaWan {
 //        send_lora_frame();
     }
 
-/**@brief Function for the Timer initialization.
+    /**@brief Function for the Timer initialization.
 
    @details Initializes the timer module. This creates and starts application timers.
 */

@@ -1162,6 +1162,7 @@ void webserver_status_page(void) {
     page_content.concat(FPSTR(EMPTY_ROW));
     page_content.concat(table_row_from_value(F("LoRaWAN"), F("Join status"),LoRaWan::state == LoRaWan::STATE_JOINED ? F("Joined"): F("Not joined"), ""));
     page_content.concat(table_row_from_value(F("LoRaWAN"), F("Last air time"),String(LoRaWan::lastAirTime), "ms"));
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Average air time"),String(LoRaWan::averageAirTime()), "ms"));
 #endif
 
     page_content.concat(FPSTR(EMPTY_ROW));

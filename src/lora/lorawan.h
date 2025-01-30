@@ -21,7 +21,8 @@ namespace LoRaWan {
     } ModuleState;
 
 extern ModuleState state;
-extern unsigned long lastAirTime;
+extern uint32_t lastAirTime;
+u32_t averageAirTime ();
 
 #define LORAWAN_APP_DATA_BUFF_SIZE 64  /**< Size of the data to be transmitted. */
 #define LORAWAN_APP_TX_DUTYCYCLE 10000 /**< Defines the application data transmission duty cycle. 10s, value in [ms]. */

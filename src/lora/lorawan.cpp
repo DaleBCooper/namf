@@ -4,17 +4,25 @@
 #ifdef NAM_LORAWAN
 
 #include "lorawan.h"
+#include "stdio.h"
+#include <Preferences.h>
 #include <ArduinoJson.h>
 #include "helpers.h"
 #include "radio/sx126x/radio.cpp"
 
 namespace LoRaWan {
+    Preferences appConfig;
     hw_config hwConfig;
     ModuleState state = STATE_OK;
 
     uint8_t nodeDeviceEUI[8];
     uint8_t nodeAppEUI[8];
     uint8_t nodeAppKey[16];
+    uint8_t NetworkSessionKey[16];
+    uint8_t AppSessionKey[16];
+    uint32_t nodeDevAddr;
+
+
     uint32_t lastAirTime = 0;
 
     unsigned long lastSend = 0;
@@ -22,6 +30,7 @@ namespace LoRaWan {
     uint32_t airTimeData[airTimeTableSize] = { };
     byte airTimeIndex = 0;
     byte airTimeSamples = 0;
+    bool OTAA_request = true;
 
     CayenneLPP lpp(20);
 
@@ -43,8 +52,60 @@ namespace LoRaWan {
     uint8_t m_lora_app_data_buffer[LORAWAN_APP_DATA_BUFF_SIZE];              ///< Lora user application data buffer.
     lmh_app_data_t m_lora_app_data = {m_lora_app_data_buffer, 0, 0, 0,
                                       0}; ///< Lora user application data structure.
+    static bool getStoredKeys(void){
+        if (!appConfig.isKey("ntwsk") || !appConfig.isKey("appsk") || !appConfig.isKey("devaddr"))
+            return false;
+        if (!appConfig.getBytes("ntwsk", NetworkSessionKey, 16))
+            return false;
+        if (!appConfig.getBytes("appsk", AppSessionKey, 16))
+            return false;
+        nodeDevAddr = appConfig.getUInt("devaddr");
+        return true;
+    }
 
-/**@brief Structure containing LoRaWan parameters, needed for lmh_init()
+    //print session keys on Serial
+    static void printKeys(byte level){
+        debug_out(F("Network session key: "), level, false);
+        char tmp[34];
+        String tmp1;
+        tmp1.reserve(64);
+        for (uint8_t i = 0; i < 16; i++){
+//            sprintf((tmp + i * 2), "%02X", NetworkSessionKey[i]);
+            tmp1.concat(String(NetworkSessionKey[i], HEX));
+            tmp1.concat(F(","));
+        }
+
+        tmp[32] = 0;
+        debug_out(String(tmp), level);
+        debug_out(F("App session key: "), level, false);
+        for (uint8_t i = 0; i < 16; i++)
+            sprintf((tmp + i * 2), "%02X", AppSessionKey[i]);
+        tmp[32] = 0;
+        debug_out(String(tmp), level);
+        debug_out(F("Node addr: "), level, false);
+        sprintf(tmp,"%X", lmh_getDevAddr() );
+        debug_out(String(tmp), level);
+    }
+
+
+    //store LoRaWAN keys in ESP32 preferences
+    static boolean storeKeys() {
+        if ( !appConfig.putBytes("ntwsk", NetworkSessionKey, 16)){
+            appConfig.remove("ntwsk");
+            return false;
+        };
+        if (!appConfig.putBytes("appsk", AppSessionKey, 16)) {
+            appConfig.remove("appsk");
+            return false;
+        };
+        if (appConfig.putUInt("devaddr",lmh_getDevAddr()) == 0) {
+            appConfig.remove("devaddr");
+            return false;
+        }
+        return true;
+    }
+
+    /**@brief Structure containing LoRaWan parameters, needed for lmh_init()
 */
     lmh_param_t lora_param_init = {LORAWAN_ADR_ON, LORAWAN_DEFAULT_DATARATE, LORAWAN_PUBLIC_NETWORK,
                                    JOINREQ_NBTRIALS, LORAWAN_DEFAULT_TX_POWER, LORAWAN_DUTYCYCLE_OFF};
@@ -85,6 +146,8 @@ namespace LoRaWan {
         return true;
     }
 
+
+
     void setup() {
         hwConfig.CHIP_TYPE = SX1262_CHIP;          // Example uses an eByte E22 module with an SX1262
         hwConfig.PIN_LORA_RESET = PIN_LORA_RESET; // LORA RESET
@@ -112,39 +175,51 @@ namespace LoRaWan {
         {
             Serial.printf("timers_init failed - %d\n", err_code);
         }
+        appConfig.begin("lorawan");
 
         // Setup the EUIs and Keys
         if (!parseStringToArray(cfg::lw_d_eui, nodeDeviceEUI, 8)) {
-            debug_out(F("Failed to parse node Device EUI!"), DEBUG_ERROR, 1);
+            debug_out(F("Failed to parse node Device EUI!"), DEBUG_ERROR);
             LoRaWan::state = ERR_DEV_EUI;
             return;
         };
         if (!parseStringToArray(cfg::lw_a_eui, nodeAppEUI, 8)) {
-            debug_out(F("Failed to parse node App EUI!"), DEBUG_ERROR, 1);
+            debug_out(F("Failed to parse node App EUI!"), DEBUG_ERROR);
             LoRaWan::state = ERR_APP_EUI;
             return;
         };
         if (!parseStringToArray(cfg::lw_app_key, nodeAppKey, 16)) {
-            debug_out(F("Failed to parse node App Key!"), DEBUG_ERROR, 1);
+            debug_out(F("Failed to parse node App Key!"), DEBUG_ERROR);
             LoRaWan::state = ERR_APP_KEY;
             return;
         };
         lmh_setDevEui(nodeDeviceEUI);
         lmh_setAppEui(nodeAppEUI);
         lmh_setAppKey(nodeAppKey);
+        if (getStoredKeys()){
+            OTAA_request = false;
+            debug_out(F("LoRaWAN Keys restored from storage"),DEBUG_MED_INFO);
+            lmh_setAppSKey(AppSessionKey);
+            lmh_setNwkSKey(NetworkSessionKey);
+            lmh_setDevAddr(nodeDevAddr);
+            printKeys(DEBUG_MED_INFO);
+        }
+
 //        lmh_setNwkSKey(nodeNwsKey);
 //        lmh_setAppSKey(nodeAppsKey);
 //        lmh_setDevAddr(nodeDevAddr);
 
         // Initialize LoRaWan
-        err_code = lmh_init(&lora_callbacks, lora_param_init, true, CLASS_A, LORAMAC_REGION_EU868);
+        if (OTAA_request) { debug_out(F("OTAA!!!"), DEBUG_MED_INFO); } else { debug_out(F("NO OTAA, keys restored"), DEBUG_MED_INFO); }
+        err_code = lmh_init(&lora_callbacks, lora_param_init, OTAA_request, CLASS_A, LORAMAC_REGION_EU868);
         if (err_code != 0)
         {
-            Serial.printf("lmh_init failed - %d\n", err_code);
+            debug_out(F("lmh_init failed - "), DEBUG_ERROR, false);
+            debug_out(String(err_code), DEBUG_ERROR);
         }
         if (!lmh_setSubBandChannels(1))
         {
-            Serial.println("lmh_setSubBandChannels failed. Wrong sub band requested?");
+            debug_out(F("lmh_setSubBandChannels failed. Wrong sub band requested?"), DEBUG_ERROR);
         }
 
         // Start Join procedure
@@ -172,7 +247,8 @@ namespace LoRaWan {
         debug_out("LORA WAN JOINED!", DEBUG_ERROR);
         lmh_class_request(CLASS_A);
         state = STATE_JOINED;
-
+        storeKeys();
+        printKeys(DEBUG_MED_INFO);
     }
 
 /**@brief Function for handling LoRaWan received data from Gateway

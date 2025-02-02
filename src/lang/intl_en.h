@@ -49,6 +49,8 @@ Files with .lang extension are searched in following directories and it's subdir
 /* ./src/sensors/bmpX80/bmpX80_en.lang */ const char INTL_BMPx80_DESC[] PROGMEM = "BMP180/280 pressure/temperature sensor";
 /* ./src/sensors/bmpX80/bmpX80_en.lang */ const char INTL_BMPx80_INSIDE[] PROGMEM = "Sensor inside case (do not use temperature reading)";
 /* ./src/lang/intl_en.lang */ const char INTL_CANCEL[] PROGMEM = "Cancel";
+/* ./src/lang/intl_en.lang */ const char INTL_CLEAR_AND_RESTART[] PROGMEM = "Clear and restart";
+/* ./src/lang/intl_en.lang */ const char INTL_CLEAR_LORA[] PROGMEM = "Really clear LoRaWAN join data?";
 /* ./src/lang/intl_en.lang */ const char INTL_CONFIGURATION[] PROGMEM = "Configuration";
 /* ./src/lang/intl_en.lang */ const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Configuration delete";
 /* ./src/lang/intl_en.lang */ const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Are you sure you want to delete the configuration?";

@@ -606,6 +606,9 @@ void webserver_config(){
         page_content.concat(formInputGrid(F("lw_a_eui"), "App EUI", lw_a_eui, 60));
         page_content.concat(formInputGrid(F("lw_d_eui"), "Device EUI", lw_d_eui, 60));
         page_content.concat(formInputGrid(F("lw_app_key"), "App key", lw_app_key, 60));
+        String link = String(F("<div class='row sect'><a class=\"plain\" href=\"/clear_lora\">Clear saved join data</a></div>"));
+        page_content.concat(link);
+
 //        page_content.concat(formInputGrid(F("lw_nws_key"), "Nws key", lw_nws_key, 60));
 //        page_content.concat(formInputGrid(F("lw_apps_key"), "Apps key", lw_apps_key, 60));
 //        page_content.concat(formInputGrid(F("lw_dev_addr"), "Device address", lw_dev_addr, 60));
@@ -1078,9 +1081,7 @@ void webserver_removeConfig() {
     server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
 
-/*****************************************************************
- * Webserver reset NodeMCU                                       *
- *****************************************************************/
+// Restart NAM
 void webserver_reset() {
     if (!webserver_request_auth()) { return; }
 
@@ -1107,7 +1108,41 @@ void webserver_reset() {
     page_content += make_footer();
     server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
+#ifdef NAM_LORAWAN
 
+#include <Preferences.h>
+Preferences appConfig;
+
+// Restart NAM
+void webserver_clear_lora() {
+    if (!webserver_request_auth()) { return; }
+    appConfig.begin("lorawan");
+    appConfig.clear();
+    String page_content = make_header(FPSTR(INTL_RESTART_SENSOR));
+    last_page_load = millis();
+    debug_out(F("output clear LoRaWAN page..."), DEBUG_MIN_INFO, 1);
+
+    if (server.method() == HTTP_GET) {
+        page_content += FPSTR(WEB_RESET_CONTENT);
+        page_content.replace("{t}", FPSTR(INTL_CLEAR_LORA));
+        page_content.replace("{b}", FPSTR(INTL_CLEAR_AND_RESTART));
+        page_content.replace("{c}", FPSTR(INTL_CANCEL));
+    } else {
+
+        String page_content = make_header(FPSTR(INTL_SENSOR_IS_REBOOTING));
+        page_content += F("<p>");
+        page_content += FPSTR(INTL_SENSOR_IS_REBOOTING_NOW);
+        page_content += F("</p>");
+        page_content += make_footer();
+        server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+        debug_out(F("restarting..."), DEBUG_MIN_INFO, 1);
+        delay(300);
+        ESP.restart();
+    }
+    page_content += make_footer();
+    server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+}
+#endif
 
 
 /********************************
@@ -1337,6 +1372,9 @@ void setup_webserver() {
     server.on(F("/images-" SOFTWARE_VERSION_SHORT), webserver_images);
     server.on(F("/stack_dump"), webserver_dump_stack);
     server.on(F("/status"), webserver_status_page);
+#ifdef NAM_LORAWAN
+    server.on(F("/clear_lora"), webserver_clear_lora);
+#endif
 #ifdef DBG_NAMF_TIMES
     server.on(F("/time"), webserver_reset_time);
 #endif

@@ -66,25 +66,25 @@ namespace LoRaWan {
     //print session keys on Serial
     static void printKeys(byte level){
         debug_out(F("Network session key: "), level, false);
-        char tmp[34];
         String tmp1;
         tmp1.reserve(64);
-        for (uint8_t i = 0; i < 16; i++){
+        for (unsigned char i : NetworkSessionKey){
 //            sprintf((tmp + i * 2), "%02X", NetworkSessionKey[i]);
             tmp1.concat(String(NetworkSessionKey[i], HEX));
             tmp1.concat(F(","));
         }
 
-        tmp[32] = 0;
-        debug_out(String(tmp), level);
+        debug_out(String(tmp1), level);
+        tmp1.clear();
+
         debug_out(F("App session key: "), level, false);
-        for (uint8_t i = 0; i < 16; i++)
-            sprintf((tmp + i * 2), "%02X", AppSessionKey[i]);
-        tmp[32] = 0;
-        debug_out(String(tmp), level);
+        for (byte i=0; i < 16; i++ ){
+            tmp1.concat(String(AppSessionKey[i]));
+            tmp1.concat(F(","));
+        }
+        debug_out(String(tmp1), level);
         debug_out(F("Node addr: "), level, false);
-        sprintf(tmp,"%X", lmh_getDevAddr() );
-        debug_out(String(tmp), level);
+        debug_out(String(lmh_getDevAddr(), HEX), level);
     }
 
 

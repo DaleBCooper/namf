@@ -22,6 +22,8 @@ namespace LoRaWan {
 
 extern ModuleState state;
 extern uint32_t lastAirTime;
+extern uint8_t AppSessionKey[16];
+
 u32_t averageAirTime ();
 
 #define LORAWAN_APP_DATA_BUFF_SIZE 64  /**< Size of the data to be transmitted. */

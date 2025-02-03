@@ -175,6 +175,9 @@ namespace LoRaWan {
         {
             Serial.printf("timers_init failed - %d\n", err_code);
         }
+        if (!cfg::lw_en) {
+            return;
+        }
         appConfig.begin("lorawan");
 
         // Setup the EUIs and Keys

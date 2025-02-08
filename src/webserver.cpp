@@ -4,8 +4,9 @@
 
 #include "webserver.h"
 #include "wifi.h"
+#ifdef NAM_LORAWAN
 #include "lora/lorawan.h"
-
+#endif
 unsigned maxSizeTemp = 0;
 void webserverPartialSend(String &s) {
     if (s.length() == 0) return;    //do not end by accident, when no data to send

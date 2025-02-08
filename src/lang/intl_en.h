@@ -70,6 +70,7 @@ Files with .lang extension are searched in following directories and it's subdir
 /* ./src/lang/intl_en.lang */ const char INTL_DIAGNOSTIC[] PROGMEM = "Send diagnostic data to Nettigo";
 /* ./src/lang/intl_en.lang */ const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 /* ./src/system/system_en.lang */ const char INTL_DISPLAY_NEW[] PROGMEM = "Display on LCD";
+/* ./src/sensors/dnms/dnms_en.lang */ const char INTL_DNMS_DESCR[] PROGMEM = "DNMS Digital Noise Measuring Sensor";
 /* ./src/lang/intl_en.lang */ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 /* ./src/lang/intl_en.lang */ const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duration router mode";
 /* ./src/system/system_en.lang */ const char INTL_ENABLE[] PROGMEM = "Enable";

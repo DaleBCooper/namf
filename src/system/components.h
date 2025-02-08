@@ -15,6 +15,7 @@
 #include "../sensors/bmpX80/bmpX80.h"
 #include "../sensors/bme280/bme280.h"
 #include "../sensors/bh1750/bh1750.h"
+#include "../sensors/dnms/dnms.h"
 
 namespace SimpleScheduler {
 

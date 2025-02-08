@@ -133,6 +133,8 @@ namespace SimpleScheduler {
                 return BME280::parseHTTPRequest();
             case SimpleScheduler::BH1750:
                 return BH17::parseHTTPRequest();
+            case SimpleScheduler::DNMS:
+                return DNMS::parseHTTPRequest();
             default:
                 StaticJsonBuffer<16> jsonBuffer;    //empty response
                 JsonObject & ret = jsonBuffer.createObject();
@@ -161,6 +163,8 @@ namespace SimpleScheduler {
                 return BME280::getConfigJSON();
             case SimpleScheduler::BH1750:
                 return BH17::getConfigJSON();
+            case SimpleScheduler::DNMS:
+                return DNMS::getConfigJSON();
             default:
                 return s;
         }
@@ -194,6 +198,9 @@ namespace SimpleScheduler {
                 return;
             case SimpleScheduler::BH1750:
                 BH17::readConfigJSON(json);
+                return;
+            case SimpleScheduler::DNMS:
+                DNMS::readConfigJSON(json);
                 return;
             default:
                 return;
@@ -250,6 +257,8 @@ namespace SimpleScheduler {
                 return FPSTR(BME280::KEY);
             case SimpleScheduler::BH1750:
                 return FPSTR(BH17::KEY);
+            case SimpleScheduler::DNMS:
+                return FPSTR(DNMS::KEY);
             default:
                 debug_out(F("**** MISSING SENSOR SLOT KEY: "), DEBUG_MIN_INFO, false);
                 debug_out(String(sensor), DEBUG_MIN_INFO, true);
@@ -280,6 +289,8 @@ namespace SimpleScheduler {
                 return FPSTR(INTL_BME280_DESC);
             case SimpleScheduler::BH1750:
                 return FPSTR(INTL_BH1750_DESC);
+            case SimpleScheduler::DNMS:
+                return FPSTR(INTL_DNMS_DESCR);
             default:
                 return F("");
         }

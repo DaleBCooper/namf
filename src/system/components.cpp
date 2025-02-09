@@ -23,7 +23,7 @@ namespace SimpleScheduler {
         }
     };
 
-    //collect results as JSON. Currently it is called only before sending data, so it can be place where
+    //collect results as JSON. Currently, it is called only before sending data, so it can be place where
     //counters are reset and calculations are done
     void getResults(String &res) {
         SDS011::results(res);

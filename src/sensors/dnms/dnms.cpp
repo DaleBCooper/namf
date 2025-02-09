@@ -10,11 +10,11 @@ namespace DNMS {
 
     constexpr uint8_t I2C_ADDRESS = 0x55;
     constexpr uint8_t MAX_VERSION_LEN = 18;
-    constexpr uint8_t CRC8_INIT = 0xFF;
-    constexpr uint8_t CRC8_LEN = 1;
-    constexpr uint8_t CRC8_POLYNOMIAL = 0x31;
-    constexpr uint8_t STATUS_OK = 0;
-    constexpr int8_t STATUS_FAIL = -1;
+    constexpr uint8_t DNMS_CRC8_INIT = 0xFF;
+    constexpr uint8_t DNMS_CRC8_LEN = 1;
+    constexpr uint8_t DNMS_CRC8_POLYNOMIAL = 0x31;
+    constexpr uint8_t DNMS_STATUS_OK = 0;
+    constexpr int8_t DNMS_STATUS_FAIL = -1;
     constexpr uint8_t WORD_SIZE = 2;
     constexpr uint8_t COMMAND_SIZE = 2;
     constexpr uint8_t MAX_BUFFER_WORDS = 32;
@@ -59,6 +59,22 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
             default:
                 return 0;
         };
+    }
+
+    void getStatusReport(String &res) {
+        if (!enabled) return;
+        res.concat(FPSTR(EMPTY_ROW));
+        char dnms_version[MAX_VERSION_LEN + 1];
+//        dnms_reset();
+//        delay(1000);
+        int16_t ret = readVersion(dnms_version);
+        if ( 0 == ret ) {
+            res.concat(table_row_from_value(F("DNMS"), F("ver"), String(dnms_version), ""));
+        }
+        else {
+            res.concat(table_row_from_value(F("DNMS"), F("ver"), F("Read failed"), ""));
+        }
+
     }
 
     void readConfigJSON(JsonObject &json) {
@@ -149,7 +165,7 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
 
     uint8_t dnms_common_generate_crc(uint8_t * data, uint16_t count) {
         uint16_t current_byte;
-        uint8_t crc = CRC8_INIT;
+uint8_t crc = DNMS_CRC8_INIT;
         uint8_t crc_bit;
 
         /* calculates 8-Bit checksum with given polynomial */
@@ -157,7 +173,7 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
             crc ^= (data[current_byte]);
             for (crc_bit = 8; crc_bit > 0; --crc_bit) {
                 if (crc & 0x80)
-                    crc = (crc << 1) ^ CRC8_POLYNOMIAL;
+crc = (crc << 1) ^ DNMS_CRC8_POLYNOMIAL;
                 else
                     crc = (crc << 1);
             }
@@ -169,9 +185,11 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
         uint8_t crc;
         crc = dnms_common_generate_crc(data, count);
         if (crc != checksum) {
-            return STATUS_FAIL;
+return
+DNMS_STATUS_FAIL;
         }
-        return STATUS_OK;
+return
+DNMS_STATUS_OK;
     }
 
     uint16_t dnms_fill_cmd_send_buf(uint8_t * buf, uint16_t cmd, const uint16_t *args, uint8_t num_args) {
@@ -218,25 +236,25 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
     int16_t dnms_i2c_read_bytes(uint8_t address, uint8_t *data, uint16_t num_words) {
         int16_t ret;
         uint16_t i, j;
-        uint16_t size = num_words * (WORD_SIZE + CRC8_LEN);
+        uint16_t size = num_words * (WORD_SIZE + DNMS_CRC8_LEN);
         uint16_t word_buf[MAX_BUFFER_WORDS];
         uint8_t * const buf8 = (uint8_t *)word_buf;
 
         ret = dnms_i2c_read(address, buf8, size);
-        if (ret != STATUS_OK) {
+        if (ret != DNMS_STATUS_OK) {
             return ret;
         }
         /* check the CRC for each word */
-        for (i = 0, j = 0; i < size; i += WORD_SIZE + CRC8_LEN) {
+        for (i = 0, j = 0; i < size; i += WORD_SIZE + DNMS_CRC8_LEN) {
             ret = dnms_common_check_crc(&buf8[i], WORD_SIZE, buf8[i + WORD_SIZE]);
-            if (ret != STATUS_OK) {
+            if (ret != DNMS_STATUS_OK) {
                 return ret;
             }
             data[j++] = buf8[i];
             data[j++] = buf8[i + 1];
         }
 
-        return STATUS_OK;
+        return DNMS_STATUS_OK;
     }
 
 
@@ -245,13 +263,13 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
         uint8_t i;
 
         ret = dnms_i2c_read_bytes(address, (uint8_t *)data_words, num_words);
-        if (ret != STATUS_OK) {
+        if (ret != DNMS_STATUS_OK) {
             return ret;
         }
         for (i = 0; i < num_words; ++i) {
             data_words[i] = be16_to_cpu(data_words[i]);
         }
-        return STATUS_OK;
+        return DNMS_STATUS_OK;
     }
 
 
@@ -261,7 +279,7 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
 
         dnms_fill_cmd_send_buf(buf, cmd, NULL, 0);
         ret = dnms_i2c_write(address, buf, COMMAND_SIZE);
-        if (ret != STATUS_OK) {
+        if (ret != DNMS_STATUS_OK) {
             return ret;
         }
         return dnms_i2c_read_words(address, data_words, num_words);
@@ -278,7 +296,7 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
 
         ret = dnms_i2c_read_cmd(I2C_ADDRESS, DNMS_CMD_READ_VERSION, (uint16_t *) buffer.dnms_version,
                                 DNMS_NUM_WORDS(buffer.dnms_version));
-        if (ret != STATUS_OK) {
+        if (ret != DNMS_STATUS_OK) {
             return ret;
         }
         DNMS_WORDS_TO_BYTES(buffer.dnms_version, DNMS_NUM_WORDS(buffer.dnms_version));

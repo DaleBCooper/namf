@@ -87,6 +87,7 @@ namespace SimpleScheduler {
         SPS30::getStatusReport(res);
         SDS011::getStatusReport(res);
         BMPx80::getStatusReport(res);
+        DNMS::getStatusReport(res);
         NetworkWatchdog::resultsAsHTML(res);
 
     }

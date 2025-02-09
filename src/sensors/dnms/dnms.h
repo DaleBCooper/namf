@@ -21,6 +21,9 @@ namespace DNMS {
     void getStatusReport(String &res);
     void readConfigJSON(JsonObject &json);
     unsigned long process(SimpleScheduler::LoopEventType);
+    void resultsAsHTML(String &);
+    void afterSend(bool status);
+    void results(String &s);
     int16_t readVersion(char *);
 }
 

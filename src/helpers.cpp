@@ -681,6 +681,7 @@ void setVariableFromHTTP(const __FlashStringHelper *name, unsigned long &v, byte
     parseHTTP(sensorID, v);
 }
 
+// number of miliseconds left to next measurement
 unsigned long time2Measure(void){
     unsigned long timeFromStart = millis() - starttime;
     if ( timeFromStart > cfg::sending_intervall_ms) return 0;

@@ -7,6 +7,11 @@ namespace DNMS {
     const char KEY[] PROGMEM = "DNMS";
     bool enabled = false;
     bool printOnLCD = false;
+    unsigned long lastStatChange = 0;
+
+    float last_value_dnms_laeq = -1.0;
+    float last_value_dnms_la_min = -1.0;
+    float last_value_dnms_la_max = -1.0;
 
     constexpr uint8_t I2C_ADDRESS = 0x55;
     constexpr uint8_t MAX_VERSION_LEN = 18;
@@ -28,11 +33,33 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
 #define DNMS_CMD_READ_DATA_READY        0x0004
 #define DNMS_CMD_READ_LEQ               0x0005
 
+
+    struct dnms_measurements {
+        float leq_a;
+        float leq_a_min;
+        float leq_a_max;
+    };
+
+
+    typedef enum {
+        UNKNOWN,
+        FAILED,
+        INITIALIZED,
+        READ,
+        WAITING,
+        READING_AVAILABLE,
+        READY_TO_SEND
+    } DNMSState;
+    DNMSState state = UNKNOWN;
+
     int16_t dnms_i2c_write_cmd(uint8_t address, uint16_t command);
     uint16_t dnms_fill_cmd_send_buf(uint8_t * buf, uint16_t cmd, const uint16_t *args, uint8_t num_args);
     int8_t dnms_i2c_write(uint8_t address, const uint8_t *data, uint16_t count);
     int16_t dnms_reset();
     bool init();
+    int16_t dnms_i2c_read_cmd(uint8_t address, uint16_t cmd, uint16_t *data_words, uint16_t num_words);
+    int16_t dnms_read_leq(struct dnms_measurements *leq);
+
 
     JsonObject &parseHTTPRequest() {
         setBoolVariableFromHTTP(String(F("enabled")), enabled, SimpleScheduler::DNMS);
@@ -44,6 +71,98 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
         return ret;
     };
 
+    void resultsAsHTML(String &page_content){
+        if (!enabled) return;
+        page_content.concat(FPSTR(EMPTY_ROW));
+        page_content.concat(table_row_from_value(FPSTR(KEY),F("LAeq"),
+                                                 String(last_value_dnms_laeq), F("dB")));
+        page_content.concat(table_row_from_value(FPSTR(KEY),F("LA min"),
+                                                 check_display_value(last_value_dnms_la_min, -1, 1, 0), F("dB")));
+        page_content.concat(table_row_from_value(FPSTR(KEY),F("LA max"),
+                                                 check_display_value(last_value_dnms_la_max, -1, 1, 0), F("dB")));
+    }
+
+
+    void updateState (DNMSState newState) {
+        state = newState;
+        lastStatChange = millis();
+    }
+
+    bool stateTimeout(unsigned long timeout) {
+        if (millis() - lastStatChange > timeout)
+            return true;
+        return false;
+    }
+
+    unsigned long processState() {
+        switch (state) {
+            case UNKNOWN:
+                init();
+                return 1000;
+            case FAILED:
+                return 0;
+            case INITIALIZED:
+                if (time2Measure() < millis() - 10000) {
+                    state = READ;
+                    return 100;
+                }
+                return 500;
+            case READ:
+                dnms_i2c_write_cmd(I2C_ADDRESS, DNMS_CMD_CALCULATE_LEQ);
+                updateState(WAITING);
+                return 30;
+            case WAITING:
+                uint16_t data_ready;
+                if (
+                        dnms_i2c_read_cmd(I2C_ADDRESS, DNMS_CMD_READ_DATA_READY, &data_ready,
+                                          DNMS_NUM_WORDS(data_ready)) == 0 &&
+                        data_ready != 0
+                        ) {
+                    updateState(READING_AVAILABLE);
+                    return 10;
+                }
+                if (stateTimeout(10000)) {
+                    updateState(UNKNOWN);
+                    debug_out(F("DNMS did not answer for 10 seconds"), DEBUG_ERROR);
+                    return 1000;
+                }
+                return 30;
+            case READING_AVAILABLE:
+                struct dnms_measurements dnms_values;
+
+                if (dnms_read_leq(&dnms_values) == 0)
+                {
+//                    float dnms_corr_value = readCorrectionOffset(cfg::dnms_correction);
+                    last_value_dnms_laeq = dnms_values.leq_a;
+                    last_value_dnms_la_min = dnms_values.leq_a_min;
+                    last_value_dnms_la_max = dnms_values.leq_a_max;
+                } else {
+                    last_value_dnms_laeq = -1.0;
+                    last_value_dnms_la_min = -1.0;
+                    last_value_dnms_la_max = -1.0;
+                }
+                updateState(READY_TO_SEND);
+                return 100;
+            case READY_TO_SEND:
+                return 500;
+
+        }
+        return 1000;
+    }
+
+    void afterSend(bool status) {
+        updateState(INITIALIZED);
+    }
+
+    void results(String &s) {
+        if (!enabled) return;
+        if (state != READY_TO_SEND) return;
+
+        s.concat(Value2Json(F("DNMS_noise_LAeq"), String(last_value_dnms_laeq)));
+        s.concat(Value2Json(F("DNMS_noise_LA_min"), String(last_value_dnms_la_min)));
+        s.concat(Value2Json(F("DNMS_noise_LA_max"), String(last_value_dnms_la_max)));
+    }
+
     unsigned long process(SimpleScheduler::LoopEventType e) {
         switch (e) {
             case SimpleScheduler::INIT:
@@ -54,8 +173,7 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
                 }
                 return 0;
             case SimpleScheduler::RUN:
-//                readValues();
-                return 10000;
+                return processState();
             default:
                 return 0;
         };
@@ -74,6 +192,9 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
         else {
             res.concat(table_row_from_value(F("DNMS"), F("ver"), F("Read failed"), ""));
         }
+        res.concat(table_row_from_value(F("DNMS"), F("state"), String(state), ""));
+        res.concat(table_row_from_value(F("DNMS"), F("Last state change"), String(millis()-lastStatChange), ""));
+
 
     }
 
@@ -123,21 +244,45 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
   }
 
 
-    struct dnms_measurements {
-        float leq_a;
-        float leq_a_min;
-        float leq_a_max;
-    };
+    int16_t dnms_read_leq(struct dnms_measurements *leq) {
+        int16_t ret;
+        uint16_t idx;
+        union {
+            uint16_t uu[2];
+            uint32_t u;
+            float f;
+        } val, data[3];
+
+        ret = dnms_i2c_read_cmd(I2C_ADDRESS, DNMS_CMD_READ_LEQ, data->uu, DNMS_NUM_WORDS(data));
+        if (ret != STATUS_OK)
+            return ret;
+
+        DNMS_WORDS_TO_BYTES(data->uu, DNMS_NUM_WORDS(data));
+
+        idx = 0;
+        val.u = be32_to_cpu(data[idx].u);
+        leq->leq_a = val.f;
+        ++idx;
+        val.u = be32_to_cpu(data[idx].u);
+        leq->leq_a_min = val.f;
+        ++idx;
+        val.u = be32_to_cpu(data[idx].u);
+        leq->leq_a_max = val.f;
+
+        return 0;
+    }
+
 
     bool init() {
         char dnms_version[MAX_VERSION_LEN + 1];
 
         debug_out(F("Trying DNMS sensor on 0x55H "), DEBUG_MIN_INFO);
         dnms_reset();
-        delay(1000);
+        delay(1000);    //TODO switch to loop in NAMF
         if (readVersion(dnms_version) != 0)
         {
             debug_out(F("No DNMS sensor"), DEBUG_ERROR);
+            state = FAILED;
             return false;
 //            dnms_init_failed = true;
         }
@@ -145,6 +290,7 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
         {
             dnms_version[MAX_VERSION_LEN] = 0;
             debug_out(String(F("DNMS ver:")) + String(dnms_version), DEBUG_ERROR);
+            state = INITIALIZED;
             return true;
         }
     }

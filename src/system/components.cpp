@@ -34,6 +34,7 @@ namespace SimpleScheduler {
         BMPx80::results(res);
         BME280::results(res);
         BH17::results(res);
+        DNMS::results(res);
     }
 
     //push results to Luftdaten/SensorCommunity
@@ -66,6 +67,7 @@ namespace SimpleScheduler {
         BMPx80::afterSend(status);
         BME280::afterSend(status);
         BH17::afterSend(status);
+        DNMS::afterSend(status);
 
     }
 
@@ -78,6 +80,7 @@ namespace SimpleScheduler {
         MHZ14A::resultsAsHTML(res);
         BMPx80::resultsAsHTML(res);
         BME280::resultsAsHTML(res);
+        DNMS::resultsAsHTML(res);
         BH17::resultsAsHTML(res);
     }
 

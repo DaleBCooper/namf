@@ -1,3 +1,7 @@
+NAMF-47rc2 ()
+- DNMS support
+- LoRaWAN support for ESP32. Still need more tests
+
 NAMF-47rc1 (2025-01-08 rev af7a734dd53b038420a132a0b761ff6c6053ba92)
 - disable WiFi when reading data from SDS011. It seems to resolve problems with checksum errors of SDS011 
 - ESP32 version changed to work with Heltec Wireless Stick Lite V3 (ESP32-S3)

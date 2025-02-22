@@ -331,6 +331,10 @@ namespace SimpleScheduler {
                 if (cols == 0) return true;
                 MHZ14A::display(rows, minor, lines);
                 return true;
+            case DNMS:
+                if (cols == 0) return true;
+                DNMS::display(rows, minor, lines);
+                return true;
             default:
                 return false;
         }

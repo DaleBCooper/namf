@@ -219,6 +219,42 @@ constexpr uint8_t DNMS_CMD_READ_VERSION = 0x0002;
         }
     }
 
+    void display(byte cols, byte minor, String lines[]) {
+
+        if (getLCDRows() == 2) {    //16x2
+            lines[0] = F("DNMS:");
+            if (last_value_dnms_laeq == -1) {
+                lines[0].concat( String(F(" --")) );
+            } else {
+                lines[0].concat(String(last_value_dnms_laeq, 1));
+                lines[0].concat(String(F(" dB")));
+                lines[1] = String(last_value_dnms_la_min,1);
+                lines[1].concat(F("/"));
+                lines[1].concat(String(last_value_dnms_la_max,1));
+                lines[1].concat(String(F(" dB")));
+            }
+        } else {
+            lines[0] = F("DNMS");
+            if (last_value_dnms_laeq == -1) {
+                lines[1].concat( String(F("--")) );
+            } else {
+                lines[1] = F("LAeq: ");
+                lines[1].concat(String(last_value_dnms_laeq, 1));
+                lines[1].concat(String(F(" dB")));
+
+                lines[2] = F("min: ");
+                lines[2].concat(String(last_value_dnms_la_min,1));
+                lines[2].concat(String(F(" dB")));
+
+                lines[3] = F("max: ");
+                lines[3].concat(String(last_value_dnms_la_max,1));
+                lines[3].concat(String(F(" dB")));
+            }
+
+        }
+
+    };
+
 
     String getConfigJSON() {
         String ret = F("");

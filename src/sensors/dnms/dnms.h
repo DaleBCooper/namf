@@ -24,6 +24,7 @@ namespace DNMS {
     void resultsAsHTML(String &);
     void afterSend(bool status);
     void results(String &s);
+    void display(byte, byte, String []);
     int16_t readVersion(char *);
 }
 

@@ -330,9 +330,7 @@ namespace SDS011 {
         }
         if (json.containsKey(F("dbg"))) {
             hardwareWatchdog = json.get<bool>(F("dbg"));
-            Wire.beginTransmission(0x26);
-            Wire.write(0x01);
-            Wire.endTransmission();
+            EXPANDER::init();
         }
 
 
@@ -423,12 +421,8 @@ namespace SDS011 {
             case OFF:
                 if (hardwareWatchdog && hwWtdgFailedReadings > 2) {
                     hwWtdgCycles++;
-                    Wire.beginTransmission(0x26);
-                    Wire.write(0x0);
-                    byte error = Wire.endTransmission();
-                    Serial.print(F("PCF status: "));
-                    Serial.println(error);
-                    if (error) {
+                    bool success = EXPANDER::setPin(0, 0);
+                    if (!success) {
                         delay(100);
                         hwWtdgErrors++;
                     } else {
@@ -443,12 +437,9 @@ namespace SDS011 {
             case HARDWARE_RESTART:
                 if (timeout(5 * 1000)) {
                     debug_out(F("Starting SDS (power ON)"), DEBUG_ERROR);
-                    Wire.beginTransmission(0x26);
-                    delay(1);
-                    Wire.write(0x01);
-                    byte error = Wire.endTransmission();
-                    Serial.println(error);
-                    if (error) {
+                    bool success = EXPANDER::setPin(0, 1);
+                    Serial.println(success);
+                    if (!success) {
                         hwWtdgErrors++;
                         delay(100);
                     } else {

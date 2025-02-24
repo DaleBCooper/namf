@@ -14,6 +14,8 @@ namespace SDS011 {
     TrackValueType trackValue = NONE;
     unsigned threshold = 0;
     unsigned hysteresis = 0;
+    long lastVal = 0;
+    bool alarm = false;
     unsigned long SDS_error_count;
     unsigned long warmupTime = WARMUPTIME_SDS_MS;
     unsigned long readTime = READINGTIME_SDS_MS;
@@ -548,6 +550,19 @@ namespace SDS011 {
         //Make sure SDS011 sensor is OFF
         SDS_cmd(PmSensorCmd::Stop);
         updateState(OFF);
+
+        // alarm on pin 7 of expander
+        if (hardwareWatchdog && trackValue > 0) {
+            long currentVal;
+            if (trackValue == PM10) {
+                currentVal = (long)last_value_SDS_P1;
+            } else {
+                currentVal = (long)last_value_SDS_P2;
+            }
+            if (abs(currentVal-(long)threshold) > hysteresis){
+                EXPANDER::setPin(7,(currentVal>threshold));
+            }
+        }
     }
     void getStatusReport(String &res) {
         if (!enabled) return;

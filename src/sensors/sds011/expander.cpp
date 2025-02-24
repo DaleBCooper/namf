@@ -4,7 +4,7 @@
 #include "expander.h"
 
 namespace EXPANDER {
-    byte portState = 0xFF;
+    byte portState = 0x7F;  //pin 7 used for alarm. so we start with off
     bool present = false;
 
     bool isPresent() {return present;}

@@ -5,6 +5,15 @@ namespace SDS011 {
             PROGMEM = "SDS011";
     bool enabled = false;
     bool printOnLCD = false;
+
+    typedef enum : byte {
+        NONE,
+        PM2_5,
+        PM10
+    } TrackValueType;
+    TrackValueType trackValue = NONE;
+    unsigned threshold = 0;
+    unsigned hysteresis = 0;
     unsigned long SDS_error_count;
     unsigned long warmupTime = WARMUPTIME_SDS_MS;
     unsigned long readTime = READINGTIME_SDS_MS;
@@ -272,6 +281,9 @@ namespace SDS011 {
         setVariableFromHTTP(String(F("r")), readTime, SimpleScheduler::SDS011);
         setBoolVariableFromHTTP(F("dbg"), hardwareWatchdog, SimpleScheduler::SDS011);
 
+        setVariableFromHTTP(F("trck"), (byte&)trackValue, SimpleScheduler::SDS011);
+        setVariableFromHTTP(F("tl"), (unsigned long&)threshold, SimpleScheduler::SDS011);
+        setVariableFromHTTP(F("th"), (unsigned long&)hysteresis, SimpleScheduler::SDS011);
         DynamicJsonBuffer jsonBuffer;
         JsonObject &ret = jsonBuffer.createObject();
         ret[F("e")] = enabled;
@@ -279,6 +291,9 @@ namespace SDS011 {
         ret[F("w")] = warmupTime;
         ret[F("r")] = readTime;
         ret[F("dbg")] = hardwareWatchdog;
+        ret[F("trck")] = trackValue;
+        ret[F("tl")] = threshold;
+        ret[F("th")] = hysteresis;
         return ret;
 
 
@@ -312,6 +327,9 @@ namespace SDS011 {
         addJsonIfNotDefault(ret, F("r"), READINGTIME_SDS_MS, readTime);
         addJsonIfNotDefault(ret, F("w"), WARMUPTIME_SDS_MS, warmupTime);
         addJsonIfNotDefault(ret, F("dbg"), false, hardwareWatchdog);
+        addJsonIfNotDefault(ret, F("trck"), NONE, trackValue);
+        addJsonIfNotDefault(ret, F("tl"), 0, threshold);
+        addJsonIfNotDefault(ret, F("th"), 0, hysteresis);
 //        if (readTime != READINGTIME_SDS_MS) ret.concat(Var2Json(F("r"), readTime));
 //        if (warmupTime != WARMUPTIME_SDS_MS) ret.concat(Var2Json(F("w"), warmupTime));
         return ret;
@@ -331,6 +349,15 @@ namespace SDS011 {
         if (json.containsKey(F("dbg"))) {
             hardwareWatchdog = json.get<bool>(F("dbg"));
             EXPANDER::init();
+        }
+        if (json.containsKey(F("trck"))) {
+            trackValue = static_cast<TrackValueType>(json.get<byte>(F("trck")));
+        }
+        if (json.containsKey(F("tl"))) {
+            threshold = json.get<unsigned>(F("tl"));
+        }
+        if (json.containsKey(F("th"))) {
+            hysteresis = json.get<unsigned>(F("th"));
         }
 
 
@@ -607,9 +634,28 @@ namespace SDS011 {
 
         setHTTPVarName(name, F("w"), SimpleScheduler::SDS011);
         ret.concat(formInputGrid(name, FPSTR(INTL_SDS011_WARMUP), String(warmupTime), 7));
-
+        formSectionHeader(F("SDS Restarter"),3);
         setHTTPVarName(name, F("dbg"), SimpleScheduler::SDS011);
         ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_HWR), hardwareWatchdog));
+        setHTTPVarName(name, F("trck"), SimpleScheduler::SDS011);
+        String s = F(
+                "<div>Drive pin 1 by:</div><div class='c2'><select name='{n}'>"
+                "<option value=0 SEL_0>None</option>"
+                "<option value=1 SEL_1>PM2.5</option>"
+                "<option value=1 SEL_3>PM10</option>"
+                "</select>"
+                "</div>"
+                );
+        s.replace("SEL_"+String(trackValue),"selected='selected'");
+        s.replace("{n}",name);
+        while (s.indexOf("SEL_") != -1) {
+            s.remove(s.indexOf("SEL_"), 5);
+        }
+        ret.concat(s);
+        setHTTPVarName(name, F("tl"), SimpleScheduler::SDS011);
+        ret.concat(formInputGrid(name, F("Tracking value threshold"), String(threshold), 7));
+        setHTTPVarName(name, F("th"), SimpleScheduler::SDS011);
+        ret.concat(formInputGrid(name, F("Tracking value hysteresis"), String(hysteresis), 7));
         advancedSectionEnd(ret, SimpleScheduler::SDS011);
         return ret;
     }

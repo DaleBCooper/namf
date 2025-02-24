@@ -609,7 +609,7 @@ void parseHTTP(const String name, unsigned long &value ){
     }
 };
 
-void  parseHTTP(const __FlashStringHelper *name, byte &value ){
+void  parseHTTP(const String &name, byte &value ){
     if (server.hasArg(name)) {
         value = server.arg(name).toInt();
     }
@@ -671,6 +671,11 @@ void setBoolVariableFromHTTP(String const name, bool &v, byte i){
 }
 
 void setVariableFromHTTP(String const name, unsigned long &v, byte i){
+    String sensorID;
+    setHTTPVarName(sensorID, name, i);
+    parseHTTP(sensorID, v);
+}
+void setVariableFromHTTP(String const name, byte &v, byte i){
     String sensorID;
     setHTTPVarName(sensorID, name, i);
     parseHTTP(sensorID, v);

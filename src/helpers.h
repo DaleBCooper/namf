@@ -46,10 +46,11 @@ void parseHTTP(const __FlashStringHelper *, unsigned long & );
 void parseHTTP(const __FlashStringHelper *, bool & );
 void parseHTTP(const __FlashStringHelper *, String & );
 void parseHTTP(const String &name, bool &value );
-void parseHTTP(const __FlashStringHelper * , byte &value );
+void parseHTTP(const String &name, byte &value );
 
 void setBoolVariableFromHTTP(String const name, bool &v, byte i);
 void setVariableFromHTTP(String const name, unsigned long &v, byte i);
+void setVariableFromHTTP(String const name, byte &v, byte i);
 void setHTTPVarName(String &varName, String const name, byte id);
 void advancedSectionStart( String &html, SimpleScheduler::LoopEntryType sensor);
 void advancedSectionEnd( String &html, SimpleScheduler::LoopEntryType sensor);

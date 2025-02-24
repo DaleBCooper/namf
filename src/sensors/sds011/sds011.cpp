@@ -1,4 +1,5 @@
 #include "sds011.h"
+#include "../lib/testable/testable.h"
 
 namespace SDS011 {
     const char KEY[]
@@ -14,7 +15,6 @@ namespace SDS011 {
     TrackValueType trackValue = NONE;
     unsigned threshold = 0;
     unsigned hysteresis = 0;
-    long lastVal = 0;
     bool alarm = false;
     unsigned long SDS_error_count;
     unsigned long warmupTime = WARMUPTIME_SDS_MS;
@@ -559,8 +559,9 @@ namespace SDS011 {
             } else {
                 currentVal = (long)last_value_SDS_P2;
             }
-            if (abs(currentVal-(long)threshold) > hysteresis){
-                EXPANDER::setPin(7,(currentVal>threshold));
+            if (alarmState(threshold, hysteresis, alarm, currentVal)){
+                alarm = alarmState(threshold, hysteresis, alarm, currentVal);
+                EXPANDER::setPin(7,alarm);
             }
         }
     }
@@ -649,7 +650,7 @@ namespace SDS011 {
 
         setHTTPVarName(name, F("w"), SimpleScheduler::SDS011);
         ret.concat(formInputGrid(name, FPSTR(INTL_SDS011_WARMUP), String(warmupTime), 7));
-        formSectionHeader(F("SDS Restarter"),3);
+        ret.concat(formSectionHeaderWithHelp(F("SDS Restarter"),F("alarm")));
         setHTTPVarName(name, F("dbg"), SimpleScheduler::SDS011);
         ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_HWR), hardwareWatchdog));
         setHTTPVarName(name, F("trck"), SimpleScheduler::SDS011);

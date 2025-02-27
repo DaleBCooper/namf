@@ -63,17 +63,23 @@ namespace LoRaWan {
         return true;
     }
 
+    void getNetworkSessionKey(String &out){
+        out.reserve(49);
+        char tmp[3];
+        for (byte i=0; i < 16; i++ ){
+            sprintf(tmp,"%02X", NetworkSessionKey[i]);
+            out.concat(String(tmp));
+            out.concat(F(","));
+        }
+
+    }
+
     //print session keys on Serial
     static void printKeys(byte level){
         debug_out(F("Network session key: "), level, false);
         String tmp1;
         tmp1.reserve(64);
-        for (unsigned char i : NetworkSessionKey){
-//            sprintf((tmp + i * 2), "%02X", NetworkSessionKey[i]);
-            tmp1.concat(String(NetworkSessionKey[i], HEX));
-            tmp1.concat(F(","));
-        }
-
+        getNetworkSessionKey(tmp1);
         debug_out(String(tmp1), level);
         tmp1.clear();
 
@@ -250,6 +256,8 @@ namespace LoRaWan {
         debug_out("LORA WAN JOINED!", DEBUG_ERROR);
         lmh_class_request(CLASS_A);
         state = STATE_JOINED;
+        lmh_getAppSkey(AppSessionKey);
+        lmh_getNwSkey(NetworkSessionKey);
         storeKeys();
         printKeys(DEBUG_MED_INFO);
     }

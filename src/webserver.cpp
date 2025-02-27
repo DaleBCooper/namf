@@ -1199,6 +1199,9 @@ void webserver_status_page(void) {
     page_content.concat(table_row_from_value(F("LoRaWAN"), F("Join status"),LoRaWan::state == LoRaWan::STATE_JOINED ? F("Joined"): F("Not joined"), ""));
     page_content.concat(table_row_from_value(F("LoRaWAN"), F("Last air time"),String(LoRaWan::lastAirTime), "ms"));
     page_content.concat(table_row_from_value(F("LoRaWAN"), F("Average air time"),String(LoRaWan::averageAirTime()), "ms"));
+    String tmp1;
+    LoRaWan::getNetworkSessionKey(tmp1);
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Network session key"),tmp1, ""));
 #endif
 
     page_content.concat(FPSTR(EMPTY_ROW));

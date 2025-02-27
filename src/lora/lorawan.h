@@ -51,6 +51,8 @@ u32_t averageAirTime ();
     void setup(void);
     void send_lora_frame(void);
 
+    //to get info for status page
+    void getNetworkSessionKey(String &out);
 }
 
 #endif //NAMF_LORAWAN_H

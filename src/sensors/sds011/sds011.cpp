@@ -655,7 +655,7 @@ namespace SDS011 {
         ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_HWR), hardwareWatchdog));
         setHTTPVarName(name, F("trck"), SimpleScheduler::SDS011);
         String s = F(
-                "<div>Drive pin 1 by:</div><div class='c2'><select name='{n}'>"
+                "<div>Drive pin 7 by:</div><div class='c2'><select name='{n}'>"
                 "<option value=0 SEL_0>None</option>"
                 "<option value=1 SEL_1>PM2.5</option>"
                 "<option value=1 SEL_3>PM10</option>"

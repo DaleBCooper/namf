@@ -1,6 +1,7 @@
-NAMF-47rc2 ()
+NAMF-47rc2 (2025-02-27 rev 0ad1c883abb2685237bd2a4801143cfb1ba07091)
 - DNMS support
 - LoRaWAN support for ESP32. Still need more tests
+- Alarm pin via SDS restarter - PM2.5 or PM10 tracking
 
 NAMF-47rc1 (2025-01-08 rev af7a734dd53b038420a132a0b761ff6c6053ba92)
 - disable WiFi when reading data from SDS011. It seems to resolve problems with checksum errors of SDS011 

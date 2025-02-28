@@ -658,7 +658,7 @@ namespace SDS011 {
                 "<div>Drive pin 7 by:</div><div class='c2'><select name='{n}'>"
                 "<option value=0 SEL_0>None</option>"
                 "<option value=1 SEL_1>PM2.5</option>"
-                "<option value=1 SEL_3>PM10</option>"
+                "<option value=2 SEL_3>PM10</option>"
                 "</select>"
                 "</div>"
                 );

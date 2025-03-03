@@ -85,7 +85,7 @@ namespace LoRaWan {
 
         debug_out(F("App session key: "), level, false);
         for (byte i=0; i < 16; i++ ){
-            tmp1.concat(String(AppSessionKey[i]));
+            tmp1.concat(String(AppSessionKey[i], HEX));
             tmp1.concat(F(","));
         }
         debug_out(String(tmp1), level);
@@ -268,8 +268,9 @@ namespace LoRaWan {
 */
     void lorawan_rx_handler(lmh_app_data_t *app_data)
     {
-        Serial.printf("LoRa Packet received on port %d, size:%d, rssi:%d, snr:%d\n",
-                      app_data->port, app_data->buffsize, app_data->rssi, app_data->snr);
+        char buff[200];
+        snprintf(buff,200,"LoRa Packet received on port %d, size:%d, rssi:%d, snr:%d\n",app_data->port, app_data->buffsize, app_data->rssi, app_data->snr );
+        debug_out(String(buff),DEBUG_MIN_INFO);
 
         switch (app_data->port)
         {

@@ -1,3 +1,7 @@
+NAMF-47rc3 (2025-03-3 rev )
+- fixed unselectable PM10 as alarm reference
+- fixed problem with unsetting alarm
+
 NAMF-47rc2 (2025-02-27 rev 0ad1c883abb2685237bd2a4801143cfb1ba07091)
 - DNMS support
 - LoRaWAN support for ESP32. Still need more tests

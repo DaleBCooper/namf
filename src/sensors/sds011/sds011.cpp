@@ -559,10 +559,8 @@ namespace SDS011 {
             } else {
                 currentVal = (long)last_value_SDS_P2;
             }
-            if (alarmState(threshold, hysteresis, alarm, currentVal)){
-                alarm = alarmState(threshold, hysteresis, alarm, currentVal);
-                EXPANDER::setPin(7,alarm);
-            }
+            alarm = alarmState(threshold, hysteresis, alarm, currentVal);
+            EXPANDER::setPin(7,alarm);
         }
     }
     void getStatusReport(String &res) {

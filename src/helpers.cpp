@@ -247,6 +247,11 @@ void debug_out(const String& text, const int level, const bool linebreak) {
     }
 }
 
+//debug out w/ new line at end
+void debugOutLn(const String &text, const int level) { debug_out(text, level, true); };
+
+//debug out w/o new line
+void debugOut(const String &text, const int level) { debug_out(text, level, false); }
 
 
 

@@ -21,6 +21,10 @@ extern const unsigned char UNIT_CELCIUS_LCD[];
 int32_t calcWiFiSignalQuality(int32_t rssi);
 
 void debug_out(const String& text, const int level, const bool linebreak = true);
+//debug out w/ new line at end
+void debugOutLn(const String& text, const int level);
+//debug out w/o new line
+void debugOut(const String& text, const int level);
 
 //declarations for changing .ino to .cpp
 String Float2String(const double value, uint8_t digits);

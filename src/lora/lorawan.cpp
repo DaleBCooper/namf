@@ -95,7 +95,7 @@ namespace LoRaWan {
         if (state == ERR_APP_EUI) out = String(F("App EUI not parsed!"));
         if (state == ERR_APP_KEY) out = String(F("App key not parsed!"));
         if (state == ERR_DEV_EUI) out = String(F("Dev EUI not parsed!"));
-        if (state == STATE_OK) out = String(F("Ready to join."));
+        if (state == STATE_OK) out = String(F("Ready to join"));
     }
 
     //print session keys on Serial

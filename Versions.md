@@ -1,4 +1,9 @@
-NAMF-47rc3 (2025-03-3 rev f550620fb9436d9d1f9787ae8b03fd4cdfcb4a1b)
+NAMF-47rc4 ()
+- Simplified LoRaWAN support :
+  - no persisting data between restarts so each restart will result in join request)
+  - sensor sends average PM2.5, PM10, temp & humidity every 5th measurement
+  
+  NAMF-47rc3 (2025-03-3 rev f550620fb9436d9d1f9787ae8b03fd4cdfcb4a1b)
 - fixed unselectable PM10 as alarm reference
 - fixed problem with unsetting alarm
 

@@ -84,7 +84,7 @@ namespace LoRaWan {
         for (byte i = 0; i < 16; i++) {
             sprintf(tmp, "%02X", AppSessionKey[i]);
             out.concat(String(tmp));
-            out.concat(F(","));
+//            out.concat(F(","));
         }
 
     }

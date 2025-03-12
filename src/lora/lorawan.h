@@ -17,6 +17,7 @@ namespace LoRaWan {
         ERR_DEV_EUI, //failed to parse dev EUI
         ERR_APP_EUI, //failed to parse app EUI
         ERR_APP_KEY, //failed to parse app key
+        JOIN_FAILED, //join procedure has failed
 
     } ModuleState;
 
@@ -44,7 +45,7 @@ u32_t averageAirTime ();
 
     extern void lorawan_join_failed_handler(void);
 
-    extern void send_lora_frame(String data);
+    extern void sendLoRaWAN(String data);
 
     extern uint32_t timers_init(void);
 
@@ -53,6 +54,8 @@ u32_t averageAirTime ();
 
     //to get info for status page
     void getNetworkSessionKey(String &out);
+    void getAppSessionKey(String &out);
+    void getStateDescription(String &out);
 }
 
 #endif //NAMF_LORAWAN_H

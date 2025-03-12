@@ -790,8 +790,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
     int result = 0;
 #if defined(NAM_LORAWAN)
     if (cfg::lw_en) {
-        debug_out("\n\nLORAWAN send.",DEBUG_MIN_INFO);
-        LoRaWan::send_lora_frame(data);
+        debug_out("LORAWAN process.",DEBUG_MIN_INFO);
+        LoRaWan::sendLoRaWAN(data);
     }
 #endif
     if (cfg::internet) {    //send data to API only if we have access to network

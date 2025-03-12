@@ -21,6 +21,8 @@ namespace LoRaWan {
     uint8_t NetworkSessionKey[16];
     uint8_t AppSessionKey[16];
     uint32_t nodeDevAddr;
+    uint32_t downlinkRcv = 0;
+    uint32_t uplinkSend = 0;
 
 
     uint32_t lastAirTime = 0;
@@ -66,12 +68,34 @@ namespace LoRaWan {
     void getNetworkSessionKey(String &out){
         out.reserve(49);
         char tmp[3];
+        out = F("");
         for (byte i=0; i < 16; i++ ){
             sprintf(tmp,"%02X", NetworkSessionKey[i]);
+            out.concat(String(tmp));
+//            out.concat(F(","));
+        }
+
+    }
+
+    void getAppSessionKey(String &out) {
+        out.reserve(49);
+        char tmp[3];
+        out = F("");
+        for (byte i = 0; i < 16; i++) {
+            sprintf(tmp, "%02X", AppSessionKey[i]);
             out.concat(String(tmp));
             out.concat(F(","));
         }
 
+    }
+
+    void getStateDescription(String &out) {
+        out = String(F("Joined"));
+        if (state == JOIN_FAILED) out = String(F("Join failed!"));
+        if (state == ERR_APP_EUI) out = String(F("App EUI not parsed!"));
+        if (state == ERR_APP_KEY) out = String(F("App key not parsed!"));
+        if (state == ERR_DEV_EUI) out = String(F("Dev EUI not parsed!"));
+        if (state == STATE_OK) out = String(F("Ready to join."));
     }
 
     //print session keys on Serial
@@ -82,11 +106,12 @@ namespace LoRaWan {
         getNetworkSessionKey(tmp1);
         debug_out(String(tmp1), level);
         tmp1.clear();
-
+        char tmp[3];
         debug_out(F("App session key: "), level, false);
         for (byte i=0; i < 16; i++ ){
-            tmp1.concat(String(AppSessionKey[i], HEX));
-            tmp1.concat(F(","));
+            sprintf(tmp, "%02X", AppSessionKey[i]);
+            tmp1.concat(tmp);
+//            tmp1.concat(F(","));
         }
         debug_out(String(tmp1), level);
         debug_out(F("Node addr: "), level, false);
@@ -205,21 +230,21 @@ namespace LoRaWan {
         lmh_setDevEui(nodeDeviceEUI);
         lmh_setAppEui(nodeAppEUI);
         lmh_setAppKey(nodeAppKey);
-        if (getStoredKeys()){
-            OTAA_request = false;
-            debug_out(F("LoRaWAN Keys restored from storage"),DEBUG_MED_INFO);
-            lmh_setAppSKey(AppSessionKey);
-            lmh_setNwkSKey(NetworkSessionKey);
-            lmh_setDevAddr(nodeDevAddr);
-            printKeys(DEBUG_MED_INFO);
-        }
+//        if (getStoredKeys()){
+//            OTAA_request = false;
+//            debug_out(F("LoRaWAN Keys restored from storage"),DEBUG_MED_INFO);
+//            lmh_setAppSKey(AppSessionKey);
+//            lmh_setNwkSKey(NetworkSessionKey);
+//            lmh_setDevAddr(nodeDevAddr);
+//            printKeys(DEBUG_MED_INFO);
+//        }
 
 //        lmh_setNwkSKey(nodeNwsKey);
 //        lmh_setAppSKey(nodeAppsKey);
 //        lmh_setDevAddr(nodeDevAddr);
 
         // Initialize LoRaWan
-        if (OTAA_request) { debug_out(F("OTAA!!!"), DEBUG_MED_INFO); } else { debug_out(F("NO OTAA, keys restored"), DEBUG_MED_INFO); }
+//        if (OTAA_request) { debug_out(F("OTAA!!!"), DEBUG_MED_INFO); } else { debug_out(F("NO OTAA, keys restored"), DEBUG_MED_INFO); }
         err_code = lmh_init(&lora_callbacks, lora_param_init, OTAA_request, CLASS_A, LORAMAC_REGION_EU868);
         if (err_code != 0)
         {
@@ -231,16 +256,15 @@ namespace LoRaWan {
             debug_out(F("lmh_setSubBandChannels failed. Wrong sub band requested?"), DEBUG_ERROR);
         }
 
-        // Start Join procedure
-        lmh_join();
+        // we will join before sending data
+//        lmh_join();
 
     }
 
     void lorawan_join_failed_handler(void)
     {
-        Serial.println("OVER_THE_AIR_ACTIVATION failed!");
-        Serial.println("Check your EUI's and Keys's!");
-        Serial.println("Check if a Gateway is in range!");
+        debug_out("OVER_THE_AIR_ACTIVATION failed!", DEBUG_ERROR);
+        state = JOIN_FAILED;
     }
 
 /**@brief LoRa function for handling HasJoined event.
@@ -260,6 +284,26 @@ namespace LoRaWan {
         lmh_getNwSkey(NetworkSessionKey);
         storeKeys();
         printKeys(DEBUG_MED_INFO);
+
+        // need to restore partial data from NVS...
+        /*
+        MibRequestConfirm_t mibReq;
+
+        mibReq.Type = MIB_UPLINK_COUNTER;
+        uplinkSend = appConfig.getULong("uplinks", 0);
+        mibReq.Param.UpLinkCounter = uplinkSend;
+        LoRaMacMibSetRequestConfirm(&mibReq);
+        debug_out("LoRaWAN Uplinks ustawione na: ", DEBUG_MED_INFO, 1);
+        debug_out(String(uplinkSend), DEBUG_MED_INFO);
+
+        mibReq.Type = MIB_DOWNLINK_COUNTER;
+        downlinkRcv = appConfig.getULong("dwnlinks", 0);
+        mibReq.Param.DownLinkCounter = downlinkRcv;
+        LoRaMacMibSetRequestConfirm(&mibReq);
+        debug_out("LoRaWAN Downlinks ustawione na: ", DEBUG_MED_INFO, 1);
+        debug_out(String(downlinkRcv), DEBUG_MED_INFO);
+        */
+
     }
 
 /**@brief Function for handling LoRaWan received data from Gateway
@@ -335,16 +379,20 @@ namespace LoRaWan {
     }
 
 
-
-    void send_lora_frame(String data)
+    void sendLoRaWAN(String data)
     {
-        static float temp = 20;
+        static byte count = 0;
+        float temp = 20;
         float pm10 = 20;
         float pm25 = 20;
         float h = -0;
+        static float sum_temp = 0;
+        static float sum_pm10 = 0;
+        static float sum_pm25 = 0;
+        static float sum_h = 0;
         DynamicJsonBuffer jsonBuffer;
 
-        if (state != STATE_JOINED) {
+        if (state == JOIN_FAILED ) {
             debug_out(F("Not joined to LoRaWAN!"), DEBUG_ERROR);
             return;
         };
@@ -376,27 +424,76 @@ namespace LoRaWan {
             }
 
         }
-        if (lmh_join_status_get() != LMH_SET)
-        {
-            //Not joined, try again later
-            Serial.println("Did not join network, skip sending frame");
-            return;
+        count++;
+        debug_out("LORAWAN step: ",DEBUG_MIN_INFO, 0);
+        debug_out(String(count),DEBUG_MIN_INFO);
+        if (count == 4 && state == STATE_OK) {  // we didn't join yet and have correct config
+            debug_out("LORAWAN join request",DEBUG_MIN_INFO);
+            lmh_join();
         }
-        lpp.reset();
-        lpp.addTemperature(1,pm10);
-        lpp.addTemperature(2,pm25);
-        lpp.addTemperature(3,temp);
-        lpp.addRelativeHumidity(1,h);
+        sum_h += h;
+        sum_temp += temp;
+        sum_pm10 += pm10;
+        sum_pm25 += pm25;
+        //every 5 measurements send data to LoRaWAN
+        if (count >= 5) {
+            debug_out("LORAWAN send!.",DEBUG_MIN_INFO);
+            lpp.reset();
+            lpp.addTemperature(1, sum_pm10/5);
+            lpp.addTemperature(2, sum_pm25/5);
+            lpp.addTemperature(3, sum_temp/5);
+            lpp.addRelativeHumidity(1, sum_h/5);
 
-        m_lora_app_data.port = LORAWAN_APP_PORT;
-        m_lora_app_data.buffer = lpp.getBuffer();
-        m_lora_app_data.buffsize = lpp.getSize();
+            //reset counters/sum vars
+            count = 0;
+            sum_pm25 = sum_pm10 = sum_temp = sum_h = 0;
 
-        lastSendStatus = lmh_send(&m_lora_app_data, LMH_UNCONFIRMED_MSG);
-        Serial.printf("lmh_send result %d\n", lastSendStatus);
-        if (lastSendStatus == LMH_SUCCESS) {
-            storeAirTime(RadioTimeOnAir(MODEM_LORA, lpp.getSize()));
-        } else { lastAirTime = 0; }
+
+
+            m_lora_app_data.port = LORAWAN_APP_PORT;
+            m_lora_app_data.buffer = lpp.getBuffer();
+            m_lora_app_data.buffsize = lpp.getSize();
+
+            lastSendStatus = lmh_send(&m_lora_app_data, LMH_UNCONFIRMED_MSG);
+            debugOut("lmh_send result ", DEBUG_MIN_INFO);
+            debugOutLn(String(lastSendStatus), DEBUG_MIN_INFO);
+            if (lastSendStatus == LMH_SUCCESS) {
+                storeAirTime(RadioTimeOnAir(MODEM_LORA, lpp.getSize()));
+            } else { lastAirTime = 0; }
+            //as for now we don't have support for persisting all required data, need to join before sending
+            //so storing counters is not needed (yet)
+            /*
+            MibRequestConfirm_t mibReq;
+            char tmp[100];
+            mibReq.Type = MIB_UPLINK_COUNTER;
+            uplinkSend = appConfig.getULong("uplinks", 0);
+            if (LoRaMacMibGetRequestConfirm(&mibReq) != LORAMAC_STATUS_SERVICE_UNKNOWN) {
+                if (uplinkSend != mibReq.Param.UpLinkCounter) {
+                    if (4==appConfig.putULong("uplinks", mibReq.Param.UpLinkCounter)){
+                        sprintf(tmp, "Uplink counter: %u\n", mibReq.Param.UpLinkCounter);
+                        debug_out(tmp, DEBUG_ERROR);
+                        sprintf(tmp, "Uplink counter from prefs: %u\n", appConfig.getULong("uplinks"));
+                        debug_out(tmp, DEBUG_ERROR);
+                    };
+
+                } else { debug_out("No uplink count change", DEBUG_ERROR);}
+
+            } else {
+                debug_out("Failed MibGetRequest",DEBUG_ERROR);
+            }
+
+            mibReq.Type = MIB_DOWNLINK_COUNTER;
+            downlinkRcv = appConfig.getULong("dwnlinks", 0);
+            LoRaMacMibGetRequestConfirm(&mibReq);
+            if (downlinkRcv != mibReq.Param.DownLinkCounter)
+                if (4==appConfig.putULong("dwnlinks", mibReq.Param.DownLinkCounter)){
+                    sprintf(tmp, "Downlink counter: %u\n", mibReq.Param.DownLinkCounter);
+                    debug_out(tmp, DEBUG_ERROR);
+                    sprintf(tmp, "Downlink counter from prefs: %u\n", appConfig.getULong("dwnlinks"));
+                    debug_out(tmp, DEBUG_ERROR);
+                };
+                */
+        }
     }
 
 /**@brief Function for handling a LoRa tx timer timeout event.

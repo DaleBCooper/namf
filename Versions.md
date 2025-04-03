@@ -1,9 +1,12 @@
-NAMF-47rc4 ()
+NAMF-47rc5 ( rev )
+- ESP8266 - user can control whether WiFi is being stopped when taking measurement from SDS011
+
+NAMF-47rc4 (2025-03-14 rev 7f0a4d41be6c9cbc859b118388e17690d39a5696)
 - Simplified LoRaWAN support :
   - no persisting data between restarts so each restart will result in join request)
   - sensor sends average PM2.5, PM10, temp & humidity every 5th measurement
   
-  NAMF-47rc3 (2025-03-3 rev f550620fb9436d9d1f9787ae8b03fd4cdfcb4a1b)
+NAMF-47rc3 (2025-03-3 rev f550620fb9436d9d1f9787ae8b03fd4cdfcb4a1b)
 - fixed unselectable PM10 as alarm reference
 - fixed problem with unsetting alarm
 

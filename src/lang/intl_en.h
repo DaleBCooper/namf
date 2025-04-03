@@ -145,6 +145,8 @@ Files with .lang extension are searched in following directories and it's subdir
 /* ./src/sensors/sds011/sds011_en.lang */ const char INTL_SDS011_LCD_HDR[] PROGMEM = "SDS011 readings:";
 /* ./src/sensors/sds011/sds011_en.lang */ const char INTL_SDS011_READTIME[] PROGMEM = "Measurement time (ms)";
 /* ./src/sensors/sds011/sds011_en.lang */ const char INTL_SDS011_WARMUP[] PROGMEM = "Warmup time before measurement (ms)";
+/* ./src/sensors/sds011/sds011_en.lang */ const char INTL_SDS011_WIFI[] PROGMEM = "WiFi and SDS011";
+/* ./src/sensors/sds011/sds011_en.lang */ const char INTL_SDS011_WIFI_OPT[] PROGMEM = "Stop WiFi when taking measurement";
 /* ./src/lang/intl_en.lang */ const char INTL_SEND_TO[] PROGMEM = "Send to {v}";
 /* ./src/lang/intl_en.lang */ const char INTL_SEND_TO_OWN_API[] PROGMEM = "own API";
 /* ./src/lang/intl_en.lang */ const char INTL_SENSOR[] PROGMEM = "Sensor";

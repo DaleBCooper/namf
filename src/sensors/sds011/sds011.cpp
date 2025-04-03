@@ -6,6 +6,7 @@ namespace SDS011 {
             PROGMEM = "SDS011";
     bool enabled = false;
     bool printOnLCD = false;
+    bool stopWiFi = true;
 
     typedef enum : byte {
         NONE,
@@ -282,7 +283,9 @@ namespace SDS011 {
         setVariableFromHTTP(F("w"), warmupTime, SimpleScheduler::SDS011);
         setVariableFromHTTP(String(F("r")), readTime, SimpleScheduler::SDS011);
         setBoolVariableFromHTTP(F("dbg"), hardwareWatchdog, SimpleScheduler::SDS011);
-
+#ifdef ARDUINO_ARCH_ESP8266
+        setBoolVariableFromHTTP(F("wf"), stopWiFi, SimpleScheduler::SDS011);
+#endif
         setVariableFromHTTP(F("trck"), (byte&)trackValue, SimpleScheduler::SDS011);
         setVariableFromHTTP(F("tl"), (unsigned long&)threshold, SimpleScheduler::SDS011);
         setVariableFromHTTP(F("th"), (unsigned long&)hysteresis, SimpleScheduler::SDS011);
@@ -329,6 +332,9 @@ namespace SDS011 {
         addJsonIfNotDefault(ret, F("r"), READINGTIME_SDS_MS, readTime);
         addJsonIfNotDefault(ret, F("w"), WARMUPTIME_SDS_MS, warmupTime);
         addJsonIfNotDefault(ret, F("dbg"), false, hardwareWatchdog);
+#ifdef ARDUINO_ARCH_ESP8266
+        addJsonIfNotDefault(ret, F("wf"), true, stopWiFi);
+#endif
         addJsonIfNotDefault(ret, F("trck"), NONE, trackValue);
         addJsonIfNotDefault(ret, F("tl"), 0, threshold);
         addJsonIfNotDefault(ret, F("th"), 0, hysteresis);
@@ -351,6 +357,9 @@ namespace SDS011 {
         if (json.containsKey(F("dbg"))) {
             hardwareWatchdog = json.get<bool>(F("dbg"));
             EXPANDER::init();
+        }
+        if (json.containsKey(F("wf"))) {
+            stopWiFi = json.get<bool>(F("wf"));
         }
         if (json.containsKey(F("trck"))) {
             trackValue = static_cast<TrackValueType>(json.get<byte>(F("trck")));
@@ -495,7 +504,8 @@ namespace SDS011 {
 //                serialSDS.flush();
                 resetReadings();
 #ifdef ARDUINO_ARCH_ESP8266
-                NAMWiFi::stopWifi();
+                if (stopWiFi)
+                    NAMWiFi::stopWifi();
 #endif
                 channelSDS.setMeasureMode(true);
                 SDS_waiting_for = SDS_REPLY_HDR;
@@ -514,7 +524,8 @@ namespace SDS011 {
                 processReadings();
                 channelSDS.setMeasureMode(false);
 #ifdef ARDUINO_ARCH_ESP8266
-                NAMWiFi::restartWiFi();
+                if (stopWiFi)
+                    NAMWiFi::restartWiFi();
 #endif
                 debug_out(F("SDS011: end of cycle"), DEBUG_MIN_INFO, 1);
                 is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
@@ -648,9 +659,16 @@ namespace SDS011 {
 
         setHTTPVarName(name, F("w"), SimpleScheduler::SDS011);
         ret.concat(formInputGrid(name, FPSTR(INTL_SDS011_WARMUP), String(warmupTime), 7));
+
+#ifdef ARDUINO_ARCH_ESP8266
+        ret.concat(formSectionHeaderWithHelp(FPSTR(INTL_SDS011_WIFI),F("s/sds_stop_wifi")));
+        setHTTPVarName(name, F("wf"), SimpleScheduler::SDS011);
+        ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_WIFI_OPT), hardwareWatchdog));
+#endif
         ret.concat(formSectionHeaderWithHelp(F("SDS Restarter"),F("s/sds_alarm")));
         setHTTPVarName(name, F("dbg"), SimpleScheduler::SDS011);
         ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_HWR), hardwareWatchdog));
+
         setHTTPVarName(name, F("trck"), SimpleScheduler::SDS011);
         String s = F(
                 "<div>Drive pin 7 by:</div><div class='c2'><select name='{n}'>"

@@ -1,5 +1,6 @@
-NAMF-47rc5 ( rev )
+NAMF-47rc5 (2025-04-4 rev db8ef82b9b44d16c5b1e04d236a10ef4c113115b)
 - ESP8266 - user can control whether WiFi is being stopped when taking measurement from SDS011
+- added no debug flag for EN target
 
 NAMF-47rc4 (2025-03-14 rev 7f0a4d41be6c9cbc859b118388e17690d39a5696)
 - Simplified LoRaWAN support :

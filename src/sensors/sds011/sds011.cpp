@@ -6,7 +6,8 @@ namespace SDS011 {
             PROGMEM = "SDS011";
     bool enabled = false;
     bool printOnLCD = false;
-    bool stopWiFi = true;
+    constexpr bool DEFAULT_STOP_WIFI = false;
+    bool stopWiFi = DEFAULT_STOP_WIFI;
 
     typedef enum : byte {
         NONE,
@@ -333,7 +334,7 @@ namespace SDS011 {
         addJsonIfNotDefault(ret, F("w"), WARMUPTIME_SDS_MS, warmupTime);
         addJsonIfNotDefault(ret, F("dbg"), false, hardwareWatchdog);
 #ifdef ARDUINO_ARCH_ESP8266
-        addJsonIfNotDefault(ret, F("wf"), true, stopWiFi);
+        addJsonIfNotDefault(ret, F("wf"), DEFAULT_STOP_WIFI, stopWiFi);
 #endif
         addJsonIfNotDefault(ret, F("trck"), NONE, trackValue);
         addJsonIfNotDefault(ret, F("tl"), 0, threshold);
@@ -663,7 +664,7 @@ namespace SDS011 {
 #ifdef ARDUINO_ARCH_ESP8266
         ret.concat(formSectionHeaderWithHelp(FPSTR(INTL_SDS011_WIFI),F("s/sds_stop_wifi")));
         setHTTPVarName(name, F("wf"), SimpleScheduler::SDS011);
-        ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_WIFI_OPT), hardwareWatchdog));
+        ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_WIFI_OPT), stopWiFi));
 #endif
         ret.concat(formSectionHeaderWithHelp(F("SDS Restarter"),F("s/sds_alarm")));
         setHTTPVarName(name, F("dbg"), SimpleScheduler::SDS011);

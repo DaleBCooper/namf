@@ -8,4 +8,4 @@ WiFi connectivity done in background.
 We have seen that despite our efforts SoftwareSerial communication suffers when WiFi is enabled. So, since NAMF-47 software is
 disabling WiFi for few seconds when collecting data from SDS011. Stop time is about SDS011 _measurement time_ + ~2 seconds for reconnect.  During this time sensor is not accessible via WiFi.
 
-Feature is enabled by default, but you can restore old behavior (being all the time on-line).
+Feature is disabled by default, but you can enable it to test if your sensor will perform better when WiFi stopped for measurement.

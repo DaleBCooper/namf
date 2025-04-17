@@ -645,7 +645,7 @@ void webserver_config(){
         page_content.concat(formInputGrid("port_influx", FPSTR(INTL_PORT), String(port_influx), max_port_digits));
         page_content.concat(formInputGrid(F("user_influx"), FPSTR(INTL_USER), user_influx,
                                        45));
-        page_content.concat(formPasswordGrid(F("pwd_influx"), FPSTR(INTL_PASSWORD), pwd_influx,
+        page_content.concat(formHTMLPasswordGrid(F("pwd_influx"), FPSTR(INTL_PASSWORD), pwd_influx,
                                           100));
 
         formSectionHeader(page_content,  FPSTR(INTL_OTHER_APIS));

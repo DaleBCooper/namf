@@ -810,6 +810,7 @@ String form_password(const String& name, const String& info, const String& value
     return s;
 }
 const char formPasswordGrid_templ[] PROGMEM = "<div>{i}</div><div class='c2'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></div>\n";
+const char formHTMLPasswordGrid_templ[] PROGMEM = "<div>{i}</div><div class='c2'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></div>\n";
 
 String formPasswordGrid(const String& name, const String& info, const String& value, const int length) {
     unsigned size = strlen_P(formPasswordGrid_templ) + 1 ;
@@ -826,6 +827,22 @@ String formPasswordGrid(const String& name, const String& info, const String& va
     s.replace("{i}", info);
     s.replace("{n}", name);
     s.replace("{v}", password);
+    s.replace("{l}", String(length));
+    return s;
+}
+
+// In "old" times WiFi in config mode was unencrypted, so passwords were replaced by "real" stars
+// Time to start using regular password fields
+String formHTMLPasswordGrid(const String& name, const String& info, const String& value, const int length) {
+    unsigned size = strlen_P(formHTMLPasswordGrid_templ) + 1 ;
+    size += name.length() + info.length() + value.length();
+
+    String s;
+    s.reserve(size);
+    s = FPSTR(formPasswordGrid_templ);
+    s.replace("{i}", info);
+    s.replace("{n}", name);
+    s.replace("{v}", value);
     s.replace("{l}", String(length));
     return s;
 }

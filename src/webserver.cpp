@@ -449,6 +449,7 @@ void parse_config_request(String &page_content) {
     parseHTTP(F("token_AQI"), token_AQI);
 
     readBoolParam(send2influx);
+    readBoolParam(api_v2_influx);
 
     parseHTTP(F("host_influx"), host_influx);
     parseHTTP(F("url_influx"), url_influx);
@@ -638,13 +639,14 @@ void webserver_config(){
 
         formSectionHeader(page_content, tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")));
         page_content.concat(formCheckboxGrid("send2influx", FPSTR(INTL_ENABLE), send2influx));
+        page_content.concat(formCheckboxGrid("api_v2_influx", FPSTR(INTL_API_V2), api_v2_influx));
         page_content.concat(formInputGrid(F("host_influx"), FPSTR(INTL_SERVER), host_influx, 60));
         page_content.concat(formInputGrid(F("url_influx"), FPSTR(INTL_PATH), url_influx, 60));
         page_content.concat(formInputGrid("port_influx", FPSTR(INTL_PORT), String(port_influx), max_port_digits));
         page_content.concat(formInputGrid(F("user_influx"), FPSTR(INTL_USER), user_influx,
-                                       35));
+                                       45));
         page_content.concat(formPasswordGrid(F("pwd_influx"), FPSTR(INTL_PASSWORD), pwd_influx,
-                                          35));
+                                          100));
 
         formSectionHeader(page_content,  FPSTR(INTL_OTHER_APIS));
 

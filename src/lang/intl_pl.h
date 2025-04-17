@@ -34,6 +34,7 @@ Files with .lang extension are searched in following directories and it's subdir
 /* ./src/sensors/bh1750/bh1750_pl.lang */ const char INTL_AMBIENT_LIGHT[] PROGMEM = "Światło otoczenia";
 /* ./src/sensors/bh1750/bh1750_pl.lang */ const char INTL_AMBIENT_LIGHT_MAX[] PROGMEM = "Maksymalne natężenie światła";
 /* ./src/sensors/bh1750/bh1750_pl.lang */ const char INTL_AMBIENT_LIGHT_MIN[] PROGMEM = "Minimalne natężenie światła";
+/* ./src/lang/intl_pl.lang */ const char INTL_API_V2[] PROGMEM = "v2 API?";
 /* ./src/lang/intl_pl.lang */ const char INTL_AQI_ECO_API[] PROGMEM = "API aqi.eco";
 /* ./src/lang/intl_pl.lang */ const char INTL_AQI_TOKEN[] PROGMEM = "Token sensora z aqi.eco";
 /* ./src/lang/intl_pl.lang */ const char INTL_AUTO_UPDATE[] PROGMEM = "Aktualizuj firmware automatycznie";

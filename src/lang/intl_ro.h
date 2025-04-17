@@ -194,6 +194,7 @@ Files with .lang extension are searched in following directories and it's subdir
  const char INTL_TAB_API[] PROGMEM = "Translate RO: INTL_TAB_API 🐱;";
  const char INTL_TAB_SENSORS[] PROGMEM = "Translate RO: INTL_TAB_SENSORS 🐱;";
  const char INTL_TAB_ADVANCED[] PROGMEM = "Translate RO: INTL_TAB_ADVANCED 🐱;";
+ const char INTL_API_V2[] PROGMEM = "Translate RO: INTL_API_V2 🐱;";
 
 
 #endif

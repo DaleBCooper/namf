@@ -94,7 +94,7 @@ namespace cfg {
     int port_influx = PORT_INFLUX;
     char *user_influx = nullptr;
     char *pwd_influx = nullptr;
-
+    bool api_v2_influx = false;
     String host_custom = FPSTR(HOST_CUSTOM);
     String url_custom = FPSTR(URL_CUSTOM);
     int port_custom = PORT_CUSTOM;

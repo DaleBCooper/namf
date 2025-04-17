@@ -70,6 +70,7 @@ INTL_SERVER Adres serwera
 INTL_PATH Ścieżka
 INTL_PORT Port
 INTL_USER Nazwa użytkownika
+INTL_API_V2 v2 API?
 INTL_PASSWORD Hasło
 INTL_SEND_TO Wysyłaj dane do: {v}
 INTL_READ_FROM Czytaj z {v}

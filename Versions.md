@@ -1,3 +1,6 @@
+NAMF_47rc7 (2025-07-03 rev)
+- removed stopping WiFi on SDS011 measurement
+
 NAMF-47rc6 (2025-04-17 rev)
 - InfluxDB v2 support
 

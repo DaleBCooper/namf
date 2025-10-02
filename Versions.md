@@ -1,5 +1,5 @@
-NAMF_47rc8 (2025-10-02 )
-- updated Particular Matter App (Feinstaub App) API port to SSL
+NAMF_47rc8 (2025-10-02 rev b0dc9be17c1327b65a9d8c944a91fa8a0108f8be)
+- updated Particulate Matter App (Feinstaub App) API port to SSL
 
 NAMF_47rc7 (2025-07-03 rev7c19c00a69d9ba3c9a57821d4c8acde8282cdd59)
 - removed stopping WiFi on SDS011 measurement

@@ -55,7 +55,7 @@ extern String tmpl(const String& patt, const String& value);
 
 #define HOST_FSAPP "www.h2801469.stratoserver.net"
 #define URL_FSAPP "/data.php"
-#define PORT_FSAPP 80
+#define PORT_FSAPP 443
 
 #define UPDATE_HOST F("fw.nettigo.pl")
 #define UPDATE_HOST_ALFA F("fw.nettigo.pl")

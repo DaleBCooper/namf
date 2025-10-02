@@ -651,7 +651,7 @@ void webserver_config(){
         formSectionHeader(page_content,  FPSTR(INTL_OTHER_APIS));
 
         page_content.concat(formCheckboxGrid("send2csv", tmpl(FPSTR(INTL_SEND_TO), F("CSV")), send2csv));
-        page_content.concat(formCheckboxGrid("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp));
+        page_content.concat(formCheckboxGridWithHelp("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), F("Particulate Matter App")), F("m/pm-app"), send2fsapp));
         formSectionHeader(page_content, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
         page_content.concat(
                 formCheckboxGrid("send2sensemap", FPSTR(INTL_ENABLE), send2sensemap));

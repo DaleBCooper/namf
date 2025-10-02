@@ -596,7 +596,7 @@ static void logEnabledAPIs() {
 
     if (cfg::send2fsapp) {
         cfg::apiCount++;
-        debug_out(F("Feinstaub app"), DEBUG_MIN_INFO);
+        debug_out(F("Particulate Matter App"), DEBUG_MIN_INFO);
     }
 
     if (cfg::send2influx) {

@@ -9,7 +9,7 @@
 const char LN_0 [] PROGMEM = "Sensor Community API";
 const char LN_1 [] PROGMEM = "Madavi API";
 const char LN_2 [] PROGMEM = "Sensemap API";
-const char LN_3 [] PROGMEM = "Feinstaub API";
+const char LN_3 [] PROGMEM = "Particulate Matter App API";
 const char LN_4 [] PROGMEM = "InfluxDB";
 const char LN_5 [] PROGMEM = "Custom API";
 const char LN_6 [] PROGMEM = "AQI.eco API";

@@ -119,6 +119,7 @@ namespace cfg {
     extern int port_influx;
     extern char *user_influx;
     extern char *pwd_influx;
+    extern bool api_v2_influx;
 
     extern String host_custom;
     extern String url_custom;

@@ -18,4 +18,15 @@ int hourIsInRange(int hour, int start, int stop) {
     return ret;
 }
 
-
+bool alarmState(unsigned threshold, unsigned hysteresis, bool previous, long value){
+    if (previous) {
+        if (value > threshold - hysteresis)
+            return true;
+        else
+            return false;
+    }
+    if (value >= threshold + hysteresis)
+        return true;
+    else
+        return false;
+}

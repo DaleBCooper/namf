@@ -92,8 +92,8 @@ const char URL_INFLUX[] PROGMEM = "/write?db=luftdaten";
 // TX (transmitting) pin on one side goes to RX (receiving) pin on other side
 // SoftSerial RX PIN is D1 and goes to SDS TX
 // SoftSerial TX PIN is D2 and goes to SDS RX
-#define PM_SERIAL_RX D1
-#define PM_SERIAL_TX D2
+#define PM_SERIAL_RX D1  // -> SDS TX
+#define PM_SERIAL_TX D2  // -> SDS RX
 #define GPS_SERIAL_RX D5
 #define GPS_SERIAL_TX D6
 

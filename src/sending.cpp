@@ -1,7 +1,9 @@
 #include "sending.h"
 
 #if defined(ARDUINO_ARCH_ESP8266)
+
 BearSSL::X509List x509_dst_root_ca(dst_root_ca_x1);
+#endif
 
 void configureCACertTrustAnchor(WiFiClientSecure* client) {
     constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
@@ -13,24 +15,14 @@ void configureCACertTrustAnchor(WiFiClientSecure* client) {
         client->setInsecure();
     }
     else {
+#if defined(ARDUINO_ARCH_ESP8266)
         client->setTrustAnchors(&x509_dst_root_ca);
-    }
-}
 #else
-void configureCACertTrustAnchor(WiFiClientSecure* client) {
-    constexpr time_t fw_built_year = (__DATE__[ 7] - '0') * 1000 + \
-							  (__DATE__[ 8] - '0') *  100 + \
-							  (__DATE__[ 9] - '0') *   10 + \
-							  (__DATE__[10] - '0');
-    if (time(nullptr) < (fw_built_year - 1970) * 365 * 24 * 3600) {
-        debug_out(F("Time incorrect; Disabling CA verification."), DEBUG_MIN_INFO,1);
-        client->setInsecure();
-    }
-    else {
-        client->setCACert(dst_root_ca_x3);
+        client->setCACert(dst_root_ca_x1);
+#endif
+
     }
 }
-#endif
 
 /*****************************************************************
  * send data to rest api                                         *
@@ -43,7 +35,7 @@ int sendData(const LoggerEntry logger, const String &data, const int pin, const 
         client = new WiFiClientSecure;
         ssl = true;
         configureCACertTrustAnchor(static_cast<WiFiClientSecure *>(client));
-#ifdef ARDUINO_ARCH_ESP8266
+#if defined(ARDUINO_ARCH_ESP8266)
         static_cast<WiFiClientSecure *>(client)->setBufferSizes(1024, TCP_MSS > 1024 ? 2048 : 1024);
 #endif
     } else {
@@ -55,6 +47,9 @@ int sendData(const LoggerEntry logger, const String &data, const int pin, const 
     switch (logger)
     {
         case LoggerInflux:
+            if (cfg::api_v2_influx) {
+                contentType = FPSTR(TXT_CONTENT_TYPE_TEXT_PLAIN);
+            } else
             contentType = FPSTR(TXT_CONTENT_TYPE_INFLUXDB);
             break;
         default:
@@ -73,22 +68,21 @@ int sendData(const LoggerEntry logger, const String &data, const int pin, const 
     debug_out(String(host), DEBUG_MAX_INFO, 1);
     debug_out(String(httpPort), DEBUG_MAX_INFO, 1);
     debug_out(String(url), DEBUG_MAX_INFO, 1);
-    if (logger == LoggerInflux && (
-            (cfg::user_influx != NULL && strlen(cfg::user_influx) > 0) ||
-            (cfg::pwd_influx != NULL && strlen(cfg::pwd_influx) > 0)
-            )) {
-        http->setAuthorization(cfg::user_influx, cfg::pwd_influx);
-    }
     if (http->begin(*client, host, httpPort, url, ssl)) {
-        if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom))
-        {
+        if (logger == LoggerInflux && (
+                (cfg::user_influx != NULL && strlen(cfg::user_influx) > 0) ||
+                (cfg::pwd_influx != NULL && strlen(cfg::pwd_influx) > 0)
+        )) {
+            if (cfg::api_v2_influx) {
+                String token = F("Token ");
+                token.concat(cfg::pwd_influx);
+                http->addHeader(F("Authorization"), token);
+            } else
+                http->setAuthorization(cfg::user_influx, cfg::pwd_influx);
+        }
+        if (logger == LoggerCustom && (*cfg::user_custom || *cfg::pwd_custom)) {
             http->setAuthorization(cfg::user_custom, cfg::pwd_custom);
         }
-        if (logger == LoggerInflux && (*cfg::user_influx || *cfg::pwd_influx))
-        {
-            http->setAuthorization(cfg::user_influx, cfg::pwd_influx);
-        }
-
         http->addHeader(F("Content-Type"), contentType);
         http->addHeader(F("X-Sensor"), String(F(PROCESSOR_ARCH)) + F("-") + esp_chipid());
         if (pin) {

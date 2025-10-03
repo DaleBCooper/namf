@@ -24,6 +24,7 @@ namespace SimpleScheduler {
         NTW_WTD,
         MHZ14A,
         BH1750,
+        DNMS,
         NAMF_LOOP_SIZE
     } LoopEntryType;
 
@@ -37,6 +38,7 @@ namespace SimpleScheduler {
     extern const char LET_7 [] PROGMEM;
     extern const char LET_8 [] PROGMEM;
     extern const char LET_9 [] PROGMEM;
+    extern const char LET_10 [] PROGMEM;
     extern const char LET_SIZE [] PROGMEM;
 
     extern const char *LET_NAMES[] PROGMEM;

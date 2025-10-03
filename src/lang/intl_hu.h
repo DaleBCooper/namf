@@ -166,6 +166,9 @@ Files with .lang extension are searched in following directories and it's subdir
  const char INTL_SPS30_SENSOR_DESC[] PROGMEM = "Translate HU: INTL_SPS30_SENSOR_DESC 🐱;";
  const char INTL_SPS30_REFRESH[] PROGMEM = "Translate HU: INTL_SPS30_REFRESH 🐱;";
  const char INTL_SPS30_NOT_STARTED[] PROGMEM = "Translate HU: INTL_SPS30_NOT_STARTED 🐱;";
+ const char INTL_DNMS_DESCR[] PROGMEM = "Translate HU: INTL_DNMS_DESCR 🐱;";
+ const char INTL_CLEAR_LORA[] PROGMEM = "Translate HU: INTL_CLEAR_LORA 🐱;";
+ const char INTL_CLEAR_AND_RESTART[] PROGMEM = "Translate HU: INTL_CLEAR_AND_RESTART 🐱;";
  const char INTL_ADVANCED_BUTTON[] PROGMEM = "Translate HU: INTL_ADVANCED_BUTTON 🐱;";
  const char INTL_ADVANCED_DISCL[] PROGMEM = "Translate HU: INTL_ADVANCED_DISCL 🐱;";
  const char INTL_DEBUG_STATUS[] PROGMEM = "Translate HU: INTL_DEBUG_STATUS 🐱;";
@@ -187,6 +190,7 @@ Files with .lang extension are searched in following directories and it's subdir
  const char INTL_UPDATE_BETA[] PROGMEM = "Translate HU: INTL_UPDATE_BETA 🐱;";
  const char INTL_UPDATE_STABLE[] PROGMEM = "Translate HU: INTL_UPDATE_STABLE 🐱;";
  const char INTL_NO_NETWORKS[] PROGMEM = "Translate HU: INTL_NO_NETWORKS 🐱;";
+ const char INTL_API_V2[] PROGMEM = "Translate HU: INTL_API_V2 🐱;";
  const char INTL_SENSOR_IS_REBOOTING_NOW[] PROGMEM = "Translate HU: INTL_SENSOR_IS_REBOOTING_NOW 🐱;";
  const char INTL_DISPLAY_NEW[] PROGMEM = "Translate HU: INTL_DISPLAY_NEW 🐱;";
 

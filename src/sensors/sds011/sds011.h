@@ -14,7 +14,8 @@
 #include "webserver.h"  //HTML functions
 //#include "PCF8574.h"
 #include "SerialSDS.h"
-
+#include "wifi.h"
+#include "expander.h"
 namespace SDS011 {
 
     extern const char KEY[] PROGMEM;

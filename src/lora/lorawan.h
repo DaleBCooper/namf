@@ -9,7 +9,7 @@
 #include <LoRaWan-Arduino.h>
 #include <SPI.h>
 #include <CayenneLPP.h>
-
+#include "helpers.h"
 namespace LoRaWan {
     typedef enum {
         STATE_OK,
@@ -17,10 +17,15 @@ namespace LoRaWan {
         ERR_DEV_EUI, //failed to parse dev EUI
         ERR_APP_EUI, //failed to parse app EUI
         ERR_APP_KEY, //failed to parse app key
+        JOIN_FAILED, //join procedure has failed
 
     } ModuleState;
 
 extern ModuleState state;
+extern uint32_t lastAirTime;
+extern uint8_t AppSessionKey[16];
+
+u32_t averageAirTime ();
 
 #define LORAWAN_APP_DATA_BUFF_SIZE 64  /**< Size of the data to be transmitted. */
 #define LORAWAN_APP_TX_DUTYCYCLE 10000 /**< Defines the application data transmission duty cycle. 10s, value in [ms]. */
@@ -40,13 +45,17 @@ extern ModuleState state;
 
     extern void lorawan_join_failed_handler(void);
 
-    extern void send_lora_frame(String data);
+    extern void sendLoRaWAN(String data);
 
     extern uint32_t timers_init(void);
 
     void setup(void);
     void send_lora_frame(void);
 
+    //to get info for status page
+    void getNetworkSessionKey(String &out);
+    void getAppSessionKey(String &out);
+    void getStateDescription(String &out);
 }
 
 #endif //NAMF_LORAWAN_H

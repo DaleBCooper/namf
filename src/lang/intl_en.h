@@ -34,6 +34,7 @@ Files with .lang extension are searched in following directories and it's subdir
 /* ./src/sensors/bh1750/bh1750_en.lang */ const char INTL_AMBIENT_LIGHT[] PROGMEM = "Ambient light";
 /* ./src/sensors/bh1750/bh1750_en.lang */ const char INTL_AMBIENT_LIGHT_MAX[] PROGMEM = "Max ambient light";
 /* ./src/sensors/bh1750/bh1750_en.lang */ const char INTL_AMBIENT_LIGHT_MIN[] PROGMEM = "Min ambient light";
+/* ./src/lang/intl_en.lang */ const char INTL_API_V2[] PROGMEM = "v2 API?";
 /* ./src/lang/intl_en.lang */ const char INTL_AQI_ECO_API[] PROGMEM = "API aqi.eco";
 /* ./src/lang/intl_en.lang */ const char INTL_AQI_TOKEN[] PROGMEM = "Sensor token from aqi.eco";
 /* ./src/lang/intl_en.lang */ const char INTL_AUTO_UPDATE[] PROGMEM = "Auto update firmware, using channel";
@@ -49,6 +50,8 @@ Files with .lang extension are searched in following directories and it's subdir
 /* ./src/sensors/bmpX80/bmpX80_en.lang */ const char INTL_BMPx80_DESC[] PROGMEM = "BMP180/280 pressure/temperature sensor";
 /* ./src/sensors/bmpX80/bmpX80_en.lang */ const char INTL_BMPx80_INSIDE[] PROGMEM = "Sensor inside case (do not use temperature reading)";
 /* ./src/lang/intl_en.lang */ const char INTL_CANCEL[] PROGMEM = "Cancel";
+/* ./src/lang/intl_en.lang */ const char INTL_CLEAR_AND_RESTART[] PROGMEM = "Clear and restart";
+/* ./src/lang/intl_en.lang */ const char INTL_CLEAR_LORA[] PROGMEM = "Really clear LoRaWAN join data?";
 /* ./src/lang/intl_en.lang */ const char INTL_CONFIGURATION[] PROGMEM = "Configuration";
 /* ./src/lang/intl_en.lang */ const char INTL_CONFIGURATION_DELETE[] PROGMEM = "Configuration delete";
 /* ./src/lang/intl_en.lang */ const char INTL_CONFIGURATION_REALLY_DELETE[] PROGMEM = "Are you sure you want to delete the configuration?";
@@ -68,6 +71,7 @@ Files with .lang extension are searched in following directories and it's subdir
 /* ./src/lang/intl_en.lang */ const char INTL_DIAGNOSTIC[] PROGMEM = "Send diagnostic data to Nettigo";
 /* ./src/lang/intl_en.lang */ const char INTL_DISPLAY[] PROGMEM = "OLED SSD1306";
 /* ./src/system/system_en.lang */ const char INTL_DISPLAY_NEW[] PROGMEM = "Display on LCD";
+/* ./src/sensors/dnms/dnms_en.lang */ const char INTL_DNMS_DESCR[] PROGMEM = "DNMS Digital Noise Measuring Sensor";
 /* ./src/lang/intl_en.lang */ const char INTL_DS18B20[] PROGMEM = "DS18B20 ({t})";
 /* ./src/lang/intl_en.lang */ const char INTL_DURATION_ROUTER_MODE[] PROGMEM = "Duration router mode";
 /* ./src/system/system_en.lang */ const char INTL_ENABLE[] PROGMEM = "Enable";

@@ -9,7 +9,7 @@
 const char LN_0 [] PROGMEM = "Sensor Community API";
 const char LN_1 [] PROGMEM = "Madavi API";
 const char LN_2 [] PROGMEM = "Sensemap API";
-const char LN_3 [] PROGMEM = "Feinstaub API";
+const char LN_3 [] PROGMEM = "Particulate Matter App API";
 const char LN_4 [] PROGMEM = "InfluxDB";
 const char LN_5 [] PROGMEM = "Custom API";
 const char LN_6 [] PROGMEM = "AQI.eco API";
@@ -56,7 +56,6 @@ namespace cfg {
 //     String lw_apps_key = F("");
 //     String lw_dev_addr = F("");
 #endif
-
     bool dht_read = DHT_READ;
     bool sds_read = SDS_READ;
     bool pms_read = PMS_READ;
@@ -95,7 +94,7 @@ namespace cfg {
     int port_influx = PORT_INFLUX;
     char *user_influx = nullptr;
     char *pwd_influx = nullptr;
-
+    bool api_v2_influx = false;
     String host_custom = FPSTR(HOST_CUSTOM);
     String url_custom = FPSTR(URL_CUSTOM);
     int port_custom = PORT_CUSTOM;

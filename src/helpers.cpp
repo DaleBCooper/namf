@@ -247,6 +247,11 @@ void debug_out(const String& text, const int level, const bool linebreak) {
     }
 }
 
+//debug out w/ new line at end
+void debugOutLn(const String &text, const int level) { debug_out(text, level, true); };
+
+//debug out w/o new line
+void debugOut(const String &text, const int level) { debug_out(text, level, false); }
 
 
 
@@ -339,6 +344,7 @@ String getConfigString(boolean maskPwd) {
 
     json_string += Var2Json(F("host_custom"), host_custom);
     copyToJSON_Bool(send2influx);
+    copyToJSON_Bool(api_v2_influx);
     json_string += Var2Json(F("host_influx"), host_influx);
     json_string += Var2Json(F("url_influx"), url_influx);
 
@@ -504,6 +510,7 @@ int readAndParseConfigFile(File configFile) {
             if (json.containsKey(F("token_AQI"))) token_AQI =  json.get<String>(F("token_AQI"));
 
             setFromJSON(send2influx);
+            setFromJSON(api_v2_influx);
 
             if (json.containsKey(F("host_influx"))) host_influx =  json.get<String>(F("host_influx"));
             if (json.containsKey(F("url_influx"))) url_influx =  json.get<String>(F("url_influx"));
@@ -609,7 +616,7 @@ void parseHTTP(const String name, unsigned long &value ){
     }
 };
 
-void  parseHTTP(const __FlashStringHelper *name, byte &value ){
+void  parseHTTP(const String &name, byte &value ){
     if (server.hasArg(name)) {
         value = server.arg(name).toInt();
     }
@@ -675,12 +682,18 @@ void setVariableFromHTTP(String const name, unsigned long &v, byte i){
     setHTTPVarName(sensorID, name, i);
     parseHTTP(sensorID, v);
 }
+void setVariableFromHTTP(String const name, byte &v, byte i){
+    String sensorID;
+    setHTTPVarName(sensorID, name, i);
+    parseHTTP(sensorID, v);
+}
 void setVariableFromHTTP(const __FlashStringHelper *name, unsigned long &v, byte i){
     String sensorID;
     setHTTPVarName(sensorID, name, i);
     parseHTTP(sensorID, v);
 }
 
+// number of miliseconds left to next measurement
 unsigned long time2Measure(void){
     unsigned long timeFromStart = millis() - starttime;
     if ( timeFromStart > cfg::sending_intervall_ms) return 0;
@@ -797,6 +810,7 @@ String form_password(const String& name, const String& info, const String& value
     return s;
 }
 const char formPasswordGrid_templ[] PROGMEM = "<div>{i}</div><div class='c2'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></div>\n";
+const char formHTMLPasswordGrid_templ[] PROGMEM = "<div>{i}</div><div class='c2'><input type='password' name='{n}' id='{n}' placeholder='{i}' value='{v}' maxlength='{l}'/></div>\n";
 
 String formPasswordGrid(const String& name, const String& info, const String& value, const int length) {
     unsigned size = strlen_P(formPasswordGrid_templ) + 1 ;
@@ -813,6 +827,22 @@ String formPasswordGrid(const String& name, const String& info, const String& va
     s.replace("{i}", info);
     s.replace("{n}", name);
     s.replace("{v}", password);
+    s.replace("{l}", String(length));
+    return s;
+}
+
+// In "old" times WiFi in config mode was unencrypted, so passwords were replaced by "real" stars
+// Time to start using regular password fields
+String formHTMLPasswordGrid(const String& name, const String& info, const String& value, const int length) {
+    unsigned size = strlen_P(formHTMLPasswordGrid_templ) + 1 ;
+    size += name.length() + info.length() + value.length();
+
+    String s;
+    s.reserve(size);
+    s = FPSTR(formPasswordGrid_templ);
+    s.replace("{i}", info);
+    s.replace("{n}", name);
+    s.replace("{v}", value);
     s.replace("{l}", String(length));
     return s;
 }

@@ -21,6 +21,10 @@ extern const unsigned char UNIT_CELCIUS_LCD[];
 int32_t calcWiFiSignalQuality(int32_t rssi);
 
 void debug_out(const String& text, const int level, const bool linebreak = true);
+//debug out w/ new line at end
+void debugOutLn(const String& text, const int level);
+//debug out w/o new line
+void debugOut(const String& text, const int level);
 
 //declarations for changing .ino to .cpp
 String Float2String(const double value, uint8_t digits);
@@ -46,10 +50,11 @@ void parseHTTP(const __FlashStringHelper *, unsigned long & );
 void parseHTTP(const __FlashStringHelper *, bool & );
 void parseHTTP(const __FlashStringHelper *, String & );
 void parseHTTP(const String &name, bool &value );
-void parseHTTP(const __FlashStringHelper * , byte &value );
+void parseHTTP(const String &name, byte &value );
 
 void setBoolVariableFromHTTP(String const name, bool &v, byte i);
 void setVariableFromHTTP(String const name, unsigned long &v, byte i);
+void setVariableFromHTTP(String const name, byte &v, byte i);
 void setHTTPVarName(String &varName, String const name, byte id);
 void advancedSectionStart( String &html, SimpleScheduler::LoopEntryType sensor);
 void advancedSectionEnd( String &html, SimpleScheduler::LoopEntryType sensor);
@@ -62,6 +67,7 @@ String form_input(const String& name, const String& info, const String& value, c
 String formInputGrid(const String& name, const String& info, const String& value, const int length);
 String form_password(const String& name, const String& info, const String& value, const int length);
 String formPasswordGrid(const String& name, const String& info, const String& value, const int length);
+String formHTMLPasswordGrid(const String& name, const String& info, const String& value, const int length);
 String form_checkbox(const String& name, const String& info, const bool checked, const bool linebreak = true);
 String formCheckboxGrid(const String& name, const String& info, const bool checked);
 String formCheckboxGridWithHelp(const String& name, const String& info, const String& id, const bool checked);

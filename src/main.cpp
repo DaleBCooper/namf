@@ -145,8 +145,10 @@ void readConfig() {
                 setDefaultConfig();
             };
 		} else {
+#if defined(ARDUINO_ARCH_ESP8266)
 			debug_out(F("config file not found, resetting WiFi settings ..."), DEBUG_ERROR, 1);
             ESP.eraseConfig();
+#endif
 		}
 }
 
@@ -224,6 +226,7 @@ static String sensorDS18B20() {
 /*****************************************************************
  * read Plantronic PM sensor sensor values                       *
  *****************************************************************/
+
 String sensorPMS() {
 	String s = "";
 	char buffer;
@@ -593,7 +596,7 @@ static void logEnabledAPIs() {
 
     if (cfg::send2fsapp) {
         cfg::apiCount++;
-        debug_out(F("Feinstaub app"), DEBUG_MIN_INFO);
+        debug_out(F("Particulate Matter App"), DEBUG_MIN_INFO);
     }
 
     if (cfg::send2influx) {
@@ -658,8 +661,8 @@ void setup() {
 
     checkFactoryReset();
 #ifdef ARDUINO_ARCH_ESP8266
-    serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false, SDS_SERIAL_BUFF_SIZE);
-    serialGPS.begin(9600, SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false, 64);
+    serialSDS.begin(9600, SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false);
+    serialGPS.begin(9600, SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false);
 #else
     serialSDS.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, PM_SERIAL_RX, PM_SERIAL_TX, false, SDS_SERIAL_BUFF_SIZE);
     serialGPS.begin(9600, EspSoftwareSerial::SWSERIAL_8N1, GPS_SERIAL_RX, GPS_SERIAL_TX, false, 64);
@@ -787,8 +790,8 @@ static unsigned long sendDataToOptionalApis(const String &data) {
     int result = 0;
 #if defined(NAM_LORAWAN)
     if (cfg::lw_en) {
-        debug_out("\n\nLORAWAN leci!",DEBUG_ERROR);
-        LoRaWan::send_lora_frame(data);
+        debug_out("LORAWAN process.",DEBUG_MIN_INFO);
+        LoRaWan::sendLoRaWAN(data);
     }
 #endif
     if (cfg::internet) {    //send data to API only if we have access to network

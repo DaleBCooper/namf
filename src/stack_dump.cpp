@@ -7,14 +7,14 @@ extern "C" void custom_crash_callback(struct rst_info *rst_info, uint32_t stack,
     boolean dump = true;
     noInterrupts();
     out = SPIFFS.open("/stack_dump", "w");
-    time_t now = time(nullptr);
-    char tmp[48];
-    strncpy(tmp, ctime(&now), 47);
-    out.print(tmp);
-    out.println(SOFTWARE_VERSION);
-    out.println(INTL_LANG);
-    out.println(ESP.getSketchMD5());
-    out.println();
+//    time_t now = time(nullptr);
+    static char tmp[50];
+//    strncpy(tmp, ctime(&now), 47);
+//    out.print(tmp);
+//    out.println(SOFTWARE_VERSION);
+//    out.println(INTL_LANG);
+//    out.println(ESP.getSketchMD5());
+//    out.println();
     uint32_t cont_stack_start = (uint32_t) &(g_cont.stack);
     uint32_t cont_stack_end = (uint32_t) g_cont.stack_end;
     uint32_t offset = 0;
@@ -25,13 +25,13 @@ extern "C" void custom_crash_callback(struct rst_info *rst_info, uint32_t stack,
             break;
         case REASON_EXCEPTION_RST:
             offset = 0x1a0;
-            snprintf(tmp, 47, "Exception (%i):\nepc1=0x%08x epc2=0x%08x",
+            snprintf(tmp, 49, "Exception (%i):\nepc1=0x%08x epc2=0x%08x",
                      rst_info->exccause, rst_info->epc1, rst_info->epc2
             );
             out.print(tmp);
-            snprintf(tmp, 47, " epc3=0x%08x excvaddr=0x%08x", rst_info->epc2, rst_info->excvaddr);
+            snprintf(tmp, 49, " epc3=0x%08x excvaddr=0x%08x", rst_info->epc2, rst_info->excvaddr);
             out.print(tmp);
-            snprintf(tmp, 47, " depc=0x%08x", rst_info->depc);
+            snprintf(tmp, 49, " depc=0x%08x", rst_info->depc);
             out.println(tmp);
             break;
         case REASON_WDT_RST:
@@ -53,13 +53,13 @@ extern "C" void custom_crash_callback(struct rst_info *rst_info, uint32_t stack,
 
     //Hardware WDT reset does not dump stack on serial...
     if (dump) {
-        snprintf(tmp, 47, "sp: %08x end: %08x offset: %04x\n", stack - offset, stack_end, offset);
+        snprintf(tmp, 49, "sp: %08x end: %08x offset: %04x\n", stack - offset, stack_end, offset);
         out.print(tmp);
         for (uint32_t pos = stack; pos < stack_end; pos += 0x10) {
             uint32_t *values = (uint32_t *) (pos);
             //rough indicator: stack frames usually have SP saved as the second word
             bool looksLikeStackFrame = (values[2] == pos + 0x10);
-            snprintf(tmp, 47, "%08x:  %08x %08x %08x %08x %c", pos, values[0], values[1], values[2], values[3],
+            snprintf(tmp, 49, "%08x:  %08x %08x %08x %08x %c", pos, values[0], values[1], values[2], values[3],
                      (looksLikeStackFrame) ? '<' : ' ');
             out.println(tmp);
         }

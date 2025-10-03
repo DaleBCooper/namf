@@ -8,7 +8,11 @@
 #include <Arduino.h>
 #if defined(ESP8266)
 #include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
 #else
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <WiFiClient.h>
 #include <HTTPClient.h>
 #endif
 
@@ -19,13 +23,8 @@
 #include "variables.h"
 #include "sensors/sds011/sds011.h"  //debugging SDS and sending data to InfluxDB
 
-#if defined(ESP8266)
-#include <ESP8266WiFi.h>
-extern void configureCACertTrustAnchor(WiFiClientSecure* client);
-#else
-#include <WiFi.h>
-#endif
 #include "ca-root.h"
+extern void configureCACertTrustAnchor( WiFiClientSecure* client);
 
 /*****************************************************************
  * send data to rest api                                         *

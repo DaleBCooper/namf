@@ -4,8 +4,41 @@ NAMF-2020-46a (2024-11-23 rev)
 NAMF-2020-46 (2024-09-15 rev 5c01c648519c6368c2db3763fa5dc6472b343ee1)
 - release based on 46rc13
 
+NAMF_47rc8 (2025-10-02 rev b0dc9be17c1327b65a9d8c944a91fa8a0108f8be)
+- updated Particulate Matter App (Feinstaub App) API port to SSL
+
+NAMF_47rc7 (2025-07-03 rev7c19c00a69d9ba3c9a57821d4c8acde8282cdd59)
+- removed stopping WiFi on SDS011 measurement
+
+NAMF-47rc6 (2025-04-17 rev)
+- InfluxDB v2 support
+
+NAMF-47rc5 (2025-04-4 rev db8ef82b9b44d16c5b1e04d236a10ef4c113115b)
+- ESP8266 - user can control whether WiFi is being stopped when taking measurement from SDS011
+- added no debug flag for EN target
+
+NAMF-47rc4 (2025-03-14 rev 7f0a4d41be6c9cbc859b118388e17690d39a5696)
+- Simplified LoRaWAN support :
+  - no persisting data between restarts so each restart will result in join request)
+  - sensor sends average PM2.5, PM10, temp & humidity every 5th measurement
+  
+NAMF-47rc3 (2025-03-3 rev f550620fb9436d9d1f9787ae8b03fd4cdfcb4a1b)
+- fixed unselectable PM10 as alarm reference
+- fixed problem with unsetting alarm
+
+NAMF-47rc2 (2025-02-27 rev 0ad1c883abb2685237bd2a4801143cfb1ba07091)
+- DNMS support
+- LoRaWAN support for ESP32. Still need more tests
+- Alarm pin via SDS restarter - PM2.5 or PM10 tracking
+
+NAMF-47rc1 (2025-01-08 rev af7a734dd53b038420a132a0b761ff6c6053ba92)
+- disable WiFi when reading data from SDS011. It seems to resolve problems with checksum errors of SDS011 
+- ESP32 version changed to work with Heltec Wireless Stick Lite V3 (ESP32-S3)
+- Update server works with ESP8266 & ESP32
+- Updates are downloaded via SSL with fallback over unsecure connection (fully working for ESP32, not finished for ESP8266)
+
 NAMF-2020-46rc13 (2024-09-12 rev e79b03f2a5e7cdd64b98cd100914383860f39b44)
-- returning with setting continous mode for SDS
+- returning with setting continuous mode for SDS
 
 NAMF-2020-46rc12 (2024-09-10 rev b028bb217b91f130c220685189ece4c52989a5bb)
 - longer reading time (more packets processed) should help in case higher checksum error ratio will be present in stable release 
@@ -61,9 +94,6 @@ NAMF-2020-46rc2 (2023-09-04 rev 202f8c1ccad2626e2e0cd8bce108a2d5920e7b33)
 NAMF-2020-46rc1 (2023-03-07 rev b6414d61f89b433deee09ae5bbe7a582eb1b0ea7)
 - Arduino core updated to 3.1.1
 - Interface to SDS011 updated to changed ESP Software Serial
-
-NAMF-2020-45a (2024-03-14 rev 0e16a834cb5b97f58cdcfde978ef034605c1a681)
-- new CA cert for Let's Encrypt
 
 NAMF-2020-45 (2023-01-07 rev 1e7d1aac0cdf06b48bcd51614b02cb9b6efae678)
 - based on NAMF-2020-45rc3

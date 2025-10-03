@@ -8,6 +8,18 @@
 
 namespace NAMWiFi {
 
+    struct WiFiSettingsT {
+        uint16_t magic;
+        uint32_t ip_address;
+        uint32_t ip_gateway;
+        uint32_t ip_mask;
+        uint32_t ip_dns1;
+        uint32_t ip_dns2;
+        uint8_t wifi_bssid[6];
+        uint16_t wifi_channel;
+    } settings;
+    bool settingsSaved = false;
+
     WiFiStatus state = UNSET;
 
     DNSServer *dnsServer = nullptr;
@@ -156,13 +168,40 @@ namespace NAMWiFi {
                 debug_out(F("WiFi state is UNSET and client SSID present. Trying to connect...."), DEBUG_MIN_INFO);
                 connectWifi();
                 lastCheck = millis();
-
             }
-
         }
-
     }
 
+    //Just try to get back WIFI_STA, it should use old credentials - to be used with SDS stopping WiFi
+    void restartWiFi() {
+        unsigned long t = millis();
+
+//        if (settingsSaved) {
+//            debug_out(F("Trying fast WiFi reconnect"), DEBUG_MED_INFO);
+//            cfg::internet = true;
+//            WiFi.persistent(true);
+//            WiFi.mode(WIFI_STA);
+//            WiFi.config(settings.ip_address, settings.ip_gateway, settings.ip_mask);
+//            WiFi.begin(cfg::wlanssid, cfg::wlanpwd, settings.wifi_channel, settings.wifi_bssid, true); //won't work with fallback wifi
+//        } else {
+        debug_out(F("Reconnecting WiFi..."), DEBUG_MED_INFO);
+        connectWifi();
+
+        debug_out(F(" done."), DEBUG_MED_INFO);
+//        }
+        delay(10);
+        byte cnt=0;
+        while (cnt < 35 && !WiFi.isConnected() ) {
+            cnt ++;
+            delay(100);
+        };
+        debug_out(F("Reconnect time: "),DEBUG_MED_INFO, false);
+        debug_out(String((millis()-t)/1000.0),DEBUG_MED_INFO);
+        debug_out(F("WiFi status: "),DEBUG_MED_INFO, false);
+        debug_out(String(WiFi.isConnected()),DEBUG_MED_INFO);
+
+
+    }
 /*****************************************************************
  * Start WiFi in AP mode (for configuration)
  *****************************************************************/
@@ -270,9 +309,24 @@ namespace NAMWiFi {
         }
         return false;
     }
+    void stopWifi() {
+        debug_out(F("Stopping WiFi"), DEBUG_MED_INFO);
+        if (WiFi.isConnected()) {
+            settingsSaved = true;
+            settings.ip_address = WiFi.localIP();
+            settings.ip_gateway = WiFi.gatewayIP();
+            settings.ip_mask = WiFi.subnetMask();
+            settings.ip_dns1 = WiFi.dnsIP(0);
+            settings.ip_dns2 = WiFi.dnsIP(1);
+            memcpy(settings.wifi_bssid, WiFi.BSSID(), 6);
+            settings.wifi_channel = WiFi.channel();
+        } else  settingsSaved = false;
 
+        WiFi.mode(WIFI_OFF);
+        cfg::internet = false;
+    }
     void tryToReconnect() {
-        if (state == CLIENT && WiFi.status() != WL_CONNECTED) {
+        if (state == CLIENT && !WiFi.isConnected()) {
             debug_out(F("Connection lost, reconnecting "), DEBUG_MIN_INFO, 0);
             WiFi.reconnect();
             NAMWiFi::waitForWifiToConnect(20);

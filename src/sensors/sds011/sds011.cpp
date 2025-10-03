@@ -1,10 +1,21 @@
 #include "sds011.h"
+#include "../lib/testable/testable.h"
 
 namespace SDS011 {
     const char KEY[]
             PROGMEM = "SDS011";
     bool enabled = false;
     bool printOnLCD = false;
+
+    typedef enum : byte {
+        NONE,
+        PM2_5,
+        PM10
+    } TrackValueType;
+    TrackValueType trackValue = NONE;
+    unsigned threshold = 0;
+    unsigned hysteresis = 0;
+    bool alarm = false;
     unsigned long SDS_error_count;
     unsigned long warmupTime = WARMUPTIME_SDS_MS;
     unsigned long readTime = READINGTIME_SDS_MS;
@@ -271,7 +282,9 @@ namespace SDS011 {
         setVariableFromHTTP(F("w"), warmupTime, SimpleScheduler::SDS011);
         setVariableFromHTTP(String(F("r")), readTime, SimpleScheduler::SDS011);
         setBoolVariableFromHTTP(F("dbg"), hardwareWatchdog, SimpleScheduler::SDS011);
-
+        setVariableFromHTTP(F("trck"), (byte&)trackValue, SimpleScheduler::SDS011);
+        setVariableFromHTTP(F("tl"), (unsigned long&)threshold, SimpleScheduler::SDS011);
+        setVariableFromHTTP(F("th"), (unsigned long&)hysteresis, SimpleScheduler::SDS011);
         DynamicJsonBuffer jsonBuffer;
         JsonObject &ret = jsonBuffer.createObject();
         ret[F("e")] = enabled;
@@ -279,6 +292,9 @@ namespace SDS011 {
         ret[F("w")] = warmupTime;
         ret[F("r")] = readTime;
         ret[F("dbg")] = hardwareWatchdog;
+        ret[F("trck")] = trackValue;
+        ret[F("tl")] = threshold;
+        ret[F("th")] = hysteresis;
         return ret;
 
 
@@ -312,6 +328,9 @@ namespace SDS011 {
         addJsonIfNotDefault(ret, F("r"), READINGTIME_SDS_MS, readTime);
         addJsonIfNotDefault(ret, F("w"), WARMUPTIME_SDS_MS, warmupTime);
         addJsonIfNotDefault(ret, F("dbg"), false, hardwareWatchdog);
+        addJsonIfNotDefault(ret, F("trck"), NONE, trackValue);
+        addJsonIfNotDefault(ret, F("tl"), 0, threshold);
+        addJsonIfNotDefault(ret, F("th"), 0, hysteresis);
 //        if (readTime != READINGTIME_SDS_MS) ret.concat(Var2Json(F("r"), readTime));
 //        if (warmupTime != WARMUPTIME_SDS_MS) ret.concat(Var2Json(F("w"), warmupTime));
         return ret;
@@ -330,9 +349,16 @@ namespace SDS011 {
         }
         if (json.containsKey(F("dbg"))) {
             hardwareWatchdog = json.get<bool>(F("dbg"));
-            Wire.beginTransmission(0x26);
-            Wire.write(0x01);
-            Wire.endTransmission();
+            EXPANDER::init();
+        }
+        if (json.containsKey(F("trck"))) {
+            trackValue = static_cast<TrackValueType>(json.get<byte>(F("trck")));
+        }
+        if (json.containsKey(F("tl"))) {
+            threshold = json.get<unsigned>(F("tl"));
+        }
+        if (json.containsKey(F("th"))) {
+            hysteresis = json.get<unsigned>(F("th"));
         }
 
 
@@ -423,12 +449,8 @@ namespace SDS011 {
             case OFF:
                 if (hardwareWatchdog && hwWtdgFailedReadings > 2) {
                     hwWtdgCycles++;
-                    Wire.beginTransmission(0x26);
-                    Wire.write(0x0);
-                    byte error = Wire.endTransmission();
-                    Serial.print(F("PCF status: "));
-                    Serial.println(error);
-                    if (error) {
+                    bool success = EXPANDER::setPin(0, 0);
+                    if (!success) {
                         delay(100);
                         hwWtdgErrors++;
                     } else {
@@ -443,12 +465,9 @@ namespace SDS011 {
             case HARDWARE_RESTART:
                 if (timeout(5 * 1000)) {
                     debug_out(F("Starting SDS (power ON)"), DEBUG_ERROR);
-                    Wire.beginTransmission(0x26);
-                    delay(1);
-                    Wire.write(0x01);
-                    byte error = Wire.endTransmission();
-                    Serial.println(error);
-                    if (error) {
+                    bool success = EXPANDER::setPin(0, 1);
+                    Serial.println(success);
+                    if (!success) {
                         hwWtdgErrors++;
                         delay(100);
                     } else {
@@ -470,13 +489,14 @@ namespace SDS011 {
             case WARMUP:
                 if (t < readTime + SDS011_END_TIME)
                     updateState(READ);
-                return 10;
+                return 20;
             case READ:
 //                serialSDS.flush();
                 resetReadings();
+                channelSDS.setMeasureMode(true);
                 SDS_waiting_for = SDS_REPLY_HDR;
                 updateState(READING);
-                return 10;
+                return 20;
             case READING:
                 if (channelSDS.fetchReading(pm10, pm25)) {
                     storeReadings(pm10, pm25);
@@ -488,6 +508,7 @@ namespace SDS011 {
                 return 20;
             case STOP:
                 processReadings();
+                channelSDS.setMeasureMode(false);
                 debug_out(F("SDS011: end of cycle"), DEBUG_MIN_INFO, 1);
                 is_SDS_running = SDS_cmd(PmSensorCmd::Stop);
                 updateState(AFTER_READING);
@@ -522,6 +543,18 @@ namespace SDS011 {
         //Make sure SDS011 sensor is OFF
         SDS_cmd(PmSensorCmd::Stop);
         updateState(OFF);
+
+        // alarm on pin 7 of expander
+        if (hardwareWatchdog && trackValue > 0) {
+            long currentVal;
+            if (trackValue == PM10) {
+                currentVal = (long)last_value_SDS_P1;
+            } else {
+                currentVal = (long)last_value_SDS_P2;
+            }
+            alarm = alarmState(threshold, hysteresis, alarm, currentVal);
+            EXPANDER::setPin(7,alarm);
+        }
     }
     void getStatusReport(String &res) {
         if (!enabled) return;
@@ -609,8 +642,29 @@ namespace SDS011 {
         setHTTPVarName(name, F("w"), SimpleScheduler::SDS011);
         ret.concat(formInputGrid(name, FPSTR(INTL_SDS011_WARMUP), String(warmupTime), 7));
 
+        ret.concat(formSectionHeaderWithHelp(F("SDS Restarter"),F("s/sds_alarm")));
         setHTTPVarName(name, F("dbg"), SimpleScheduler::SDS011);
         ret.concat(formCheckboxGrid(name, FPSTR(INTL_SDS011_HWR), hardwareWatchdog));
+
+        setHTTPVarName(name, F("trck"), SimpleScheduler::SDS011);
+        String s = F(
+                "<div>Drive pin 7 by:</div><div class='c2'><select name='{n}'>"
+                "<option value=0 SEL_0>None</option>"
+                "<option value=1 SEL_1>PM2.5</option>"
+                "<option value=2 SEL_3>PM10</option>"
+                "</select>"
+                "</div>"
+                );
+        s.replace("SEL_"+String(trackValue),"selected='selected'");
+        s.replace("{n}",name);
+        while (s.indexOf("SEL_") != -1) {
+            s.remove(s.indexOf("SEL_"), 5);
+        }
+        ret.concat(s);
+        setHTTPVarName(name, F("tl"), SimpleScheduler::SDS011);
+        ret.concat(formInputGrid(name, F("Tracking value threshold"), String(threshold), 7));
+        setHTTPVarName(name, F("th"), SimpleScheduler::SDS011);
+        ret.concat(formInputGrid(name, F("Tracking value hysteresis"), String(hysteresis), 7));
         advancedSectionEnd(ret, SimpleScheduler::SDS011);
         return ret;
     }

@@ -1,3 +1,5 @@
+INTL_CLEAR_LORA Really clear LoRaWAN join data?
+INTL_CLEAR_AND_RESTART Clear and restart
 INTL_HELP More info about feature
 INTL_BACKLIGHT LCD backlight
 INTL_BACKLIGHT_STOP Stop at (hour):
@@ -73,6 +75,7 @@ INTL_SERVER Server
 INTL_PATH Path
 INTL_PORT Port
 INTL_USER User
+INTL_API_V2 v2 API?
 INTL_PASSWORD Password
 INTL_SEND_TO Send to {v}
 INTL_READ_FROM Read from {v}

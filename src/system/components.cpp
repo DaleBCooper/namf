@@ -23,7 +23,7 @@ namespace SimpleScheduler {
         }
     };
 
-    //collect results as JSON. Currently it is called only before sending data, so it can be place where
+    //collect results as JSON. Currently, it is called only before sending data, so it can be place where
     //counters are reset and calculations are done
     void getResults(String &res) {
         SDS011::results(res);
@@ -34,6 +34,7 @@ namespace SimpleScheduler {
         BMPx80::results(res);
         BME280::results(res);
         BH17::results(res);
+        DNMS::results(res);
     }
 
     //push results to Luftdaten/SensorCommunity
@@ -66,6 +67,7 @@ namespace SimpleScheduler {
         BMPx80::afterSend(status);
         BME280::afterSend(status);
         BH17::afterSend(status);
+        DNMS::afterSend(status);
 
     }
 
@@ -78,6 +80,7 @@ namespace SimpleScheduler {
         MHZ14A::resultsAsHTML(res);
         BMPx80::resultsAsHTML(res);
         BME280::resultsAsHTML(res);
+        DNMS::resultsAsHTML(res);
         BH17::resultsAsHTML(res);
     }
 
@@ -87,6 +90,7 @@ namespace SimpleScheduler {
         SPS30::getStatusReport(res);
         SDS011::getStatusReport(res);
         BMPx80::getStatusReport(res);
+        DNMS::getStatusReport(res);
         NetworkWatchdog::resultsAsHTML(res);
 
     }
@@ -133,6 +137,8 @@ namespace SimpleScheduler {
                 return BME280::parseHTTPRequest();
             case SimpleScheduler::BH1750:
                 return BH17::parseHTTPRequest();
+            case SimpleScheduler::DNMS:
+                return DNMS::parseHTTPRequest();
             default:
                 StaticJsonBuffer<16> jsonBuffer;    //empty response
                 JsonObject & ret = jsonBuffer.createObject();
@@ -161,6 +167,8 @@ namespace SimpleScheduler {
                 return BME280::getConfigJSON();
             case SimpleScheduler::BH1750:
                 return BH17::getConfigJSON();
+            case SimpleScheduler::DNMS:
+                return DNMS::getConfigJSON();
             default:
                 return s;
         }
@@ -194,6 +202,9 @@ namespace SimpleScheduler {
                 return;
             case SimpleScheduler::BH1750:
                 BH17::readConfigJSON(json);
+                return;
+            case SimpleScheduler::DNMS:
+                DNMS::readConfigJSON(json);
                 return;
             default:
                 return;
@@ -250,6 +261,8 @@ namespace SimpleScheduler {
                 return FPSTR(BME280::KEY);
             case SimpleScheduler::BH1750:
                 return FPSTR(BH17::KEY);
+            case SimpleScheduler::DNMS:
+                return FPSTR(DNMS::KEY);
             default:
                 debug_out(F("**** MISSING SENSOR SLOT KEY: "), DEBUG_MIN_INFO, false);
                 debug_out(String(sensor), DEBUG_MIN_INFO, true);
@@ -280,6 +293,8 @@ namespace SimpleScheduler {
                 return FPSTR(INTL_BME280_DESC);
             case SimpleScheduler::BH1750:
                 return FPSTR(INTL_BH1750_DESC);
+            case SimpleScheduler::DNMS:
+                return FPSTR(INTL_DNMS_DESCR);
             default:
                 return F("");
         }
@@ -315,6 +330,10 @@ namespace SimpleScheduler {
             case MHZ14A:
                 if (cols == 0) return true;
                 MHZ14A::display(rows, minor, lines);
+                return true;
+            case DNMS:
+                if (cols == 0) return true;
+                DNMS::display(rows, minor, lines);
                 return true;
             default:
                 return false;

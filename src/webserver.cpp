@@ -4,6 +4,9 @@
 
 #include "webserver.h"
 #include "wifi.h"
+#ifdef NAM_LORAWAN
+#include "lora/lorawan.h"
+#endif
 unsigned maxSizeTemp = 0;
 void webserverPartialSend(String &s) {
     if (s.length() == 0) return;    //do not end by accident, when no data to send
@@ -252,58 +255,6 @@ void webserver_config_json() {
     server.send(200, FPSTR(TXT_CONTENT_TYPE_JSON), page_content);
 }
 
-
-//Webserver - force update with custom URL
-void webserver_config_force_update() {
-
-    if (!webserver_request_auth()) { return; }
-    String page_content = make_header(FPSTR(INTL_CONFIGURATION));
-    if (server.method() == HTTP_POST) {
-        if (server.hasArg("ver") && server.hasArg("lg") ) {
-            page_content.concat(make_footer());
-            server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-            delay(200);
-            cfg::auto_update = false;
-            writeConfig();
-            cfg::auto_update = true;
-            String p = F("/NAMF/data/2020-");
-            p.concat(server.arg("ver"));
-            p.concat(F("/latest_"));
-            p.concat(server.arg("lg"));
-            p.concat(F(".bin"));
-            debug_out(F("Downgrade attempt to: "),DEBUG_ERROR, false);
-            debug_out(p, DEBUG_ERROR);
-            updateFW(F("fw.nettigo.pl"), F("80"), p);
-            delay(5000);
-            ESP.restart();
-        }
-        else {
-            server.sendHeader(F("Location"), F("/"));
-        }
-
-    }else {
-
-        page_content.concat(F("<h2>Force update</h2>"));
-        page_content.concat(
-                F("<p>It will disable autoupdate, and try to reinstall older NAMF version. To return to newest version "
-                  "just re-eneable autoupdate in config.</p>"
-                  "<form method='POST' action='/rollback' style='width:100%;'>")
-                  );
-        page_content.concat(F("Select version: <select name='ver'><option value='45'>2020-45</option>"));
-        page_content.concat(F("Select version: <select name='ver'><option value='44'>2020-44</option>"));
-        page_content.concat(F("Select version: <select name='ver'><option value='43'>2020-43</option><option value='42'>2020-42</option></select><br/>"));
-        page_content.concat(F("Select language: <select name='lg'><option value='en'>English</option><option value='pl'>Polish</option></select><br/>"));
-        page_content.concat(F("<br/>"));
-        page_content.concat(form_submit(FPSTR(INTL_SAVE_AND_RESTART)));
-        page_content.concat(F("</form>"));
-        page_content.concat(make_footer());
-
-
-    }
-    server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
-}
-
-
 //Webserver - current config as JSON (txt) to save
 void webserver_config_json_save() {
 
@@ -498,6 +449,7 @@ void parse_config_request(String &page_content) {
     parseHTTP(F("token_AQI"), token_AQI);
 
     readBoolParam(send2influx);
+    readBoolParam(api_v2_influx);
 
     parseHTTP(F("host_influx"), host_influx);
     parseHTTP(F("url_influx"), url_influx);
@@ -656,6 +608,9 @@ void webserver_config(){
         page_content.concat(formInputGrid(F("lw_a_eui"), "App EUI", lw_a_eui, 60));
         page_content.concat(formInputGrid(F("lw_d_eui"), "Device EUI", lw_d_eui, 60));
         page_content.concat(formInputGrid(F("lw_app_key"), "App key", lw_app_key, 60));
+        String link = String(F("<div class='row sect'><a class=\"plain\" href=\"/clear_lora\">Clear saved join data</a></div>"));
+        page_content.concat(link);
+
 //        page_content.concat(formInputGrid(F("lw_nws_key"), "Nws key", lw_nws_key, 60));
 //        page_content.concat(formInputGrid(F("lw_apps_key"), "Apps key", lw_apps_key, 60));
 //        page_content.concat(formInputGrid(F("lw_dev_addr"), "Device address", lw_dev_addr, 60));
@@ -684,18 +639,19 @@ void webserver_config(){
 
         formSectionHeader(page_content, tmpl(FPSTR(INTL_SEND_TO), F("InfluxDB")));
         page_content.concat(formCheckboxGrid("send2influx", FPSTR(INTL_ENABLE), send2influx));
+        page_content.concat(formCheckboxGrid("api_v2_influx", FPSTR(INTL_API_V2), api_v2_influx));
         page_content.concat(formInputGrid(F("host_influx"), FPSTR(INTL_SERVER), host_influx, 60));
         page_content.concat(formInputGrid(F("url_influx"), FPSTR(INTL_PATH), url_influx, 60));
         page_content.concat(formInputGrid("port_influx", FPSTR(INTL_PORT), String(port_influx), max_port_digits));
         page_content.concat(formInputGrid(F("user_influx"), FPSTR(INTL_USER), user_influx,
-                                       35));
-        page_content.concat(formPasswordGrid(F("pwd_influx"), FPSTR(INTL_PASSWORD), pwd_influx,
-                                          35));
+                                       45));
+        page_content.concat(formHTMLPasswordGrid(F("pwd_influx"), FPSTR(INTL_PASSWORD), pwd_influx,
+                                          100));
 
         formSectionHeader(page_content,  FPSTR(INTL_OTHER_APIS));
 
         page_content.concat(formCheckboxGrid("send2csv", tmpl(FPSTR(INTL_SEND_TO), F("CSV")), send2csv));
-        page_content.concat(formCheckboxGrid("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), F("Feinstaub-App")), send2fsapp));
+        page_content.concat(formCheckboxGridWithHelp("send2fsapp", tmpl(FPSTR(INTL_SEND_TO), F("Particulate Matter App")), F("m/pm-app"), send2fsapp));
         formSectionHeader(page_content, tmpl(FPSTR(INTL_SEND_TO), F("OpenSenseMap")));
         page_content.concat(
                 formCheckboxGrid("send2sensemap", FPSTR(INTL_ENABLE), send2sensemap));
@@ -929,7 +885,7 @@ void webserver_wifi() {
 #ifdef ARDUINO_ARCH_ESP8266
             page_content.concat(wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == ENC_TYPE_NONE) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI));
 #else
-            page_content.concat(wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == WIFI_AUTH_OPEN) ? " " : u8"🔒"), wifiInfo[indices[i]].RSSI));
+            page_content.concat(wlan_ssid_to_table_row(wifiInfo[indices[i]].ssid, ((wifiInfo[indices[i]].encryptionType == WIFI_AUTH_OPEN) ? String(" ") : String("🔒")), wifiInfo[indices[i]].RSSI));
 #endif
         }
         page_content.concat(FPSTR(TABLE_TAG_CLOSE_BR));
@@ -980,7 +936,7 @@ void webserver_values() {
         page_content.concat(
                 table_row_from_value(FPSTR(SENSORS_PMSx003), "PM10", check_display_value(last_value_PMS_P1, -1, 1, 0),
                                      unit_PM));
-    }
+    };
     if (cfg::dht_read) {
         page_content.concat(FPSTR(EMPTY_ROW));
         page_content.concat(table_row_from_value(FPSTR(SENSORS_DHT22), FPSTR(INTL_TEMPERATURE),
@@ -1128,9 +1084,7 @@ void webserver_removeConfig() {
     server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
 
-/*****************************************************************
- * Webserver reset NodeMCU                                       *
- *****************************************************************/
+// Restart NAM
 void webserver_reset() {
     if (!webserver_request_auth()) { return; }
 
@@ -1157,7 +1111,41 @@ void webserver_reset() {
     page_content += make_footer();
     server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
 }
+#ifdef NAM_LORAWAN
 
+#include <Preferences.h>
+Preferences appConfig;
+
+// Restart NAM
+void webserver_clear_lora() {
+    if (!webserver_request_auth()) { return; }
+    appConfig.begin("lorawan");
+    appConfig.clear();
+    String page_content = make_header(FPSTR(INTL_RESTART_SENSOR));
+    last_page_load = millis();
+    debug_out(F("output clear LoRaWAN page..."), DEBUG_MIN_INFO, 1);
+
+    if (server.method() == HTTP_GET) {
+        page_content += FPSTR(WEB_RESET_CONTENT);
+        page_content.replace("{t}", FPSTR(INTL_CLEAR_LORA));
+        page_content.replace("{b}", FPSTR(INTL_CLEAR_AND_RESTART));
+        page_content.replace("{c}", FPSTR(INTL_CANCEL));
+    } else {
+
+        String page_content = make_header(FPSTR(INTL_SENSOR_IS_REBOOTING));
+        page_content += F("<p>");
+        page_content += FPSTR(INTL_SENSOR_IS_REBOOTING_NOW);
+        page_content += F("</p>");
+        page_content += make_footer();
+        server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+        debug_out(F("restarting..."), DEBUG_MIN_INFO, 1);
+        delay(300);
+        ESP.restart();
+    }
+    page_content += make_footer();
+    server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), page_content);
+}
+#endif
 
 
 /********************************
@@ -1208,6 +1196,27 @@ void webserver_status_page(void) {
     page_content.concat(table_row_from_value(F("NAM"), F("Uptime"), millisToTime(millis()), ""));
     page_content.concat(table_row_from_value(F("NAM"), FPSTR(INTL_TIME_FROM_UPDATE), millisToTime(msSince(last_update_attempt)), ""));
     page_content.concat(table_row_from_value(F("NAM"), F("Internet connection"),String(cfg::internet), ""));
+#ifdef NAM_LORAWAN
+    String tmp1;
+
+    page_content.concat(FPSTR(EMPTY_ROW));
+    LoRaWan::getStateDescription(tmp1);
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Join status"), tmp1, ""));
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Last air time"),String(LoRaWan::lastAirTime), "ms"));
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Average air time"),String(LoRaWan::averageAirTime()), "ms"));
+    tmp1 = F("");
+    if (LoRaWan::state == LoRaWan::STATE_JOINED) {
+        char addr[10];
+        sprintf(addr,"%08X",lmh_getDevAddr());
+        tmp1 = String(addr);
+    }
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Device address"), tmp1, ""));
+    LoRaWan::getNetworkSessionKey(tmp1);
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("Network session key"),tmp1, ""));
+    LoRaWan::getAppSessionKey(tmp1);
+    page_content.concat(table_row_from_value(F("LoRaWAN"), F("App session key"),tmp1, ""));
+#endif
+
     page_content.concat(FPSTR(EMPTY_ROW));
     page_content.concat(table_row_from_value(F("APIs"), F("Status"),F("Time"), ""));
     for (byte i=0; i<cfg::apiCount;i++){
@@ -1368,7 +1377,6 @@ void setup_webserver() {
     server.on(F("/simple_config"), webserver_simple_config);
     server.on(F("/config.json"), HTTP_GET, webserver_config_json);
     server.on(F("/configSave.json"), webserver_config_json_save);
-    server.on(F("/rollback"), webserver_config_force_update);
     server.on(F("/wifi"), webserver_wifi);
     server.on(F("/values"), webserver_values);
     server.on(F("/debug"), webserver_debug_level);
@@ -1381,6 +1389,9 @@ void setup_webserver() {
     server.on(F("/images-" SOFTWARE_VERSION_SHORT), webserver_images);
     server.on(F("/stack_dump"), webserver_dump_stack);
     server.on(F("/status"), webserver_status_page);
+#ifdef NAM_LORAWAN
+    server.on(F("/clear_lora"), webserver_clear_lora);
+#endif
 #ifdef DBG_NAMF_TIMES
     server.on(F("/time"), webserver_reset_time);
 #endif

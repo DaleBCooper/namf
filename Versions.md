@@ -1,13 +1,10 @@
-NAMF-2020-46a (2024-11-23 rev)
-- fix for #79 - wrong format of Prometheus endpoint
+NAMF-47 ()
+Stable release based on NAMF-47rc8 
 
-NAMF-2020-46 (2024-09-15 rev 5c01c648519c6368c2db3763fa5dc6472b343ee1)
-- release based on 46rc13
-
-NAMF_47rc8 (2025-10-02 rev b0dc9be17c1327b65a9d8c944a91fa8a0108f8be)
+NAMF-47rc8 (2025-10-02 rev b0dc9be17c1327b65a9d8c944a91fa8a0108f8be)
 - updated Particulate Matter App (Feinstaub App) API port to SSL
 
-NAMF_47rc7 (2025-07-03 rev7c19c00a69d9ba3c9a57821d4c8acde8282cdd59)
+NAMF-47rc7 (2025-07-03 rev7c19c00a69d9ba3c9a57821d4c8acde8282cdd59)
 - removed stopping WiFi on SDS011 measurement
 
 NAMF-47rc6 (2025-04-17 rev)
@@ -21,7 +18,7 @@ NAMF-47rc4 (2025-03-14 rev 7f0a4d41be6c9cbc859b118388e17690d39a5696)
 - Simplified LoRaWAN support :
   - no persisting data between restarts so each restart will result in join request)
   - sensor sends average PM2.5, PM10, temp & humidity every 5th measurement
-  
+
 NAMF-47rc3 (2025-03-3 rev f550620fb9436d9d1f9787ae8b03fd4cdfcb4a1b)
 - fixed unselectable PM10 as alarm reference
 - fixed problem with unsetting alarm
@@ -32,10 +29,16 @@ NAMF-47rc2 (2025-02-27 rev 0ad1c883abb2685237bd2a4801143cfb1ba07091)
 - Alarm pin via SDS restarter - PM2.5 or PM10 tracking
 
 NAMF-47rc1 (2025-01-08 rev af7a734dd53b038420a132a0b761ff6c6053ba92)
-- disable WiFi when reading data from SDS011. It seems to resolve problems with checksum errors of SDS011 
+- disable WiFi when reading data from SDS011. It seems to resolve problems with checksum errors of SDS011
 - ESP32 version changed to work with Heltec Wireless Stick Lite V3 (ESP32-S3)
 - Update server works with ESP8266 & ESP32
 - Updates are downloaded via SSL with fallback over unsecure connection (fully working for ESP32, not finished for ESP8266)
+
+NAMF-2020-46a (2024-11-23 rev)
+- fix for #79 - wrong format of Prometheus endpoint
+
+NAMF-2020-46 (2024-09-15 rev 5c01c648519c6368c2db3763fa5dc6472b343ee1)
+- release based on 46rc13
 
 NAMF-2020-46rc13 (2024-09-12 rev e79b03f2a5e7cdd64b98cd100914383860f39b44)
 - returning with setting continuous mode for SDS

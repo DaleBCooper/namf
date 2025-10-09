@@ -1,4 +1,4 @@
-NAMF-47 ()
+NAMF-47 (2025-10-05 rev c0fc3b9b16dee812b241d767cc415b5d35fe895c)
 Stable release based on NAMF-47rc8 
 
 NAMF-47rc8 (2025-10-02 rev b0dc9be17c1327b65a9d8c944a91fa8a0108f8be)

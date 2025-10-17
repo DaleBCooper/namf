@@ -1,3 +1,6 @@
+NAMF-48rc1 (2025-10-17 rev)
+- Disable factory reset procedure. It seems that it clears config when problem with power source occurs
+
 NAMF-47 (2025-10-05 rev c0fc3b9b16dee812b241d767cc415b5d35fe895c)
 Stable release based on NAMF-47rc8 
 

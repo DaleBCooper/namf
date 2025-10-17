@@ -26,6 +26,7 @@ void checkFactoryReset() {
         debug_out(F("\n\n***************** Error mounting FS! *****************\n\n"), DEBUG_ERROR);
         return;
     }
+    return; //disable reset to factory defaults. Source of problems when power outages?
     debug_out(F("OK"), DEBUG_MIN_INFO);
 #ifdef ARDUINO_ARCH_ESP32
     if ( 14 !=  rtc_get_reset_reason(1)) {
